@@ -369,7 +369,12 @@ class PoolConfig(MinerConfigValue):
 
     @classmethod
     def from_am_modern(cls, web_conf: dict) -> "PoolConfig":
-        pool_data = web_conf["pools"]
+        if type(web_conf) is  dict:
+            pool_data = web_conf.get("pools", [])
+        elif type(web_conf) is  list:
+            pool_data = web_conf
+        else:
+            pool_data =[]
 
         return cls([PoolGroup.from_am_modern(pool_data)])
 
