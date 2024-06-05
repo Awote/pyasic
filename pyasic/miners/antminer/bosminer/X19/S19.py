@@ -72,3 +72,6 @@ class BOSMinerS19jProPlus(BOSMiner, S19jProPlus):
 
 class BOSMinerS19XP(BOSMiner, S19XP):
     pass
+
+class BOSMinerBHB42621(BOSMinerS19jPro):
+    pass

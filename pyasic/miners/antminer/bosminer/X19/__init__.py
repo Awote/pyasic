@@ -26,5 +26,6 @@ from .S19 import (
     BOSMinerS19Plus,
     BOSMinerS19Pro,
     BOSMinerS19XP,
+    BOSMinerBHB42621
 )
 from .T19 import BOSMinerT19
