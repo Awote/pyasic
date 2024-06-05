@@ -138,7 +138,7 @@ class Pool(MinerConfigValue):
         return cls(
             url=toml_pool_conf["url"],
             user=toml_pool_conf["user"],
-            password=toml_pool_conf["password"],
+            password=toml_pool_conf["password"] if toml_pool_conf.get("password") is not None else "",
         )
 
     @classmethod
@@ -149,7 +149,7 @@ class Pool(MinerConfigValue):
             password=web_pool["pass"],
         )
 
-
+#  password=toml_pool_conf["password"] if toml_pool_conf.get("password") is not None else "",
 @dataclass
 class PoolGroup(MinerConfigValue):
     pools: List[Pool] = field(default_factory=list)
