@@ -82,3 +82,6 @@ class BMMinerS19L(AntminerModern, S19L):
 
 class BMMinerS19ProHydro(AntminerModern, S19ProHydro):
     pass
+
+class BMMinerBHB42621(BMMinerS19jPro):
+    pass

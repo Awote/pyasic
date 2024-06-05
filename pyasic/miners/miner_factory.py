@@ -94,6 +94,7 @@ MINER_CLASSES = {
         "ANTMINER S19A PRO": BMMinerS19aPro,
         "ANTMINER S19 PRO HYD.": BMMinerS19ProHydro,
         "ANTMINER T19": BMMinerT19,
+        "ANTMINER BHB42621":BMMinerBHB42621
     },
     MinerTypes.WHATSMINER: {
         None: BTMiner,
@@ -801,7 +802,6 @@ class MinerFactory:
         web_json_data = await self.send_web_command(
             ip, "/cgi-bin/get_system_info.cgi", auth=auth
         )
-
         try:
             miner_model = web_json_data["minertype"]
 
