@@ -17,7 +17,8 @@
 import asyncio
 import ipaddress
 import logging
-from typing import AsyncIterator, List, Union
+import math
+from typing import AsyncIterator, List, Optional, Union
 
 from pyasic import settings
 from pyasic.miners.miner_factory import AnyMiner, miner_factory
@@ -109,7 +110,7 @@ class MinerNetwork:
         """
         return cls(list(ipaddress.ip_network(subnet, strict=False).hosts()))
 
-    async def scan(self) -> List[AnyMiner]:
+    async def scan(self, slicer:Optional[int] = None) -> List[AnyMiner]:
         """Scan the network for miners.
 
         Returns:
@@ -117,13 +118,25 @@ class MinerNetwork:
         """
         return await self.scan_network_for_miners()
 
-    async def scan_network_for_miners(self) -> List[AnyMiner]:
+    async def scan_network_for_miners(self, slicer:Optional[int] = None) -> List[AnyMiner]:
         logging.debug(f"{self} - (Scan Network For Miners) - Scanning")
 
         # clear cached miners
         miner_factory.clear_cached_miners()
 
-        miners = await asyncio.gather(
+        if slicer is not None:
+            tasks = []
+            batch = math.ceil(len(self.hosts)/slicer)
+            for idx in range(batch):
+                start_position = idx * slicer
+                tasks.append([self.ping_and_get_miner(item) for item in self.hosts[
+                    start_position : start_position + slicer
+                ]])
+            miners = []
+            for task in tasks:
+                miners.extend(await asyncio.gather(*task))
+        else:
+            miners = await asyncio.gather(
             *[self.ping_and_get_miner(host) for host in self.hosts]
         )
 

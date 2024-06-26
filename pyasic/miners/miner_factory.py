@@ -94,7 +94,10 @@ MINER_CLASSES = {
         "ANTMINER S19A PRO": BMMinerS19aPro,
         "ANTMINER S19 PRO HYD.": BMMinerS19ProHydro,
         "ANTMINER T19": BMMinerT19,
-        "ANTMINER BHB42621":BMMinerBHB42621
+        "ANTMINER BHB42621":BMMinerBHB42621,
+        "ANTMINER S19K PRO": BMMinerS19kPro,
+        "ANTMINER S21":BMMinerS21,
+        "ANTMINER T21": BMMinerT21
     },
     MinerTypes.WHATSMINER: {
         None: BTMiner,
