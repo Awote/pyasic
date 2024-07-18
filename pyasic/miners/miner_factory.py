@@ -363,7 +363,8 @@ MINER_CLASSES = {
         "ANTMINER S19K PRO NOPIC": BOSMinerS19kProNoPIC,
         "ANTMINER S19XP": BOSMinerS19XP,
         "ANTMINER T19": BOSMinerT19,
-        "ANTMINER BHB42621": BOSMinerBHB42621
+        "ANTMINER BHB42621": BOSMinerBHB42621,
+        "ANTMINER S19 XP": BOSMinerS19XP
     },
     MinerTypes.VNISH: {
         None: VNish,
