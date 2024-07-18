@@ -33,7 +33,7 @@ from pyasic.miners.base import (
 
 BMMINER_DATA_LOC = DataLocations(
     **{
-        str(DataOptions.MAC): DataFunction("get_mac",[RPCAPICommand("api_info", "get_system_info")]),
+        str(DataOptions.MAC): DataFunction("get_mac"),
         str(DataOptions.MODEL): DataFunction("get_model"),
         str(DataOptions.API_VERSION): DataFunction(
             "get_api_ver", [RPCAPICommand("api_version", "version")]

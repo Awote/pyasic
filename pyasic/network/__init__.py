@@ -116,7 +116,7 @@ class MinerNetwork:
         Returns:
             A list of found miners.
         """
-        return await self.scan_network_for_miners()
+        return await self.scan_network_for_miners(slicer)
 
     async def scan_network_for_miners(self, slicer:Optional[int] = None) -> List[AnyMiner]:
         logging.debug(f"{self} - (Scan Network For Miners) - Scanning")
