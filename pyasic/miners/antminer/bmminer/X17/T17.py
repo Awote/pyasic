@@ -19,12 +19,15 @@ from pyasic.miners.types import T17, T17e, T17Plus
 
 
 class BMMinerT17(AntminerOld, T17):
+    stock_nominal_hashrate = [42000]
     pass
 
 
 class BMMinerT17Plus(AntminerOld, T17Plus):
+    stock_nominal_hashrate = [58000]
     pass
 
 
 class BMMinerT17e(AntminerOld, T17e):
+    stock_nominal_hashrate = [53000]
     pass

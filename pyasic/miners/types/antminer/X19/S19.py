@@ -188,7 +188,7 @@ class S19ProPlusHydro(AntMiner):
     def __init__(self, ip: str, api_ver: str = "0.0.0"):
         super().__init__(ip, api_ver)
         self.ip = ip
-        self.model = "Antminer S19 Pro+ Hydro"
+        self.model = "S19 Pro+ Hydro"
         self.expected_chips = 180
         self.expected_hashboards = 4
         self.fan_count = 0
@@ -197,7 +197,7 @@ class S19XPHydro(AntMiner):
     def __init__(self, ip: str, api_ver: str = "0.0.0"):
         super().__init__(ip, api_ver)
         self.ip = ip
-        self.model = "Antminer S19 XP Hydro"
+        self.model = "S19 XP Hydro"
         self.expected_chips = 204
         self.expected_hashboards = 3
         self.fan_count = 0
@@ -206,7 +206,7 @@ class S19jXP(AntMiner):
     def __init__(self,ip:str, api_ver:str = "0.0.0"):
         super().__init__(ip, api_ver)
         self.ip = ip
-        self.model = "Antminer S19j XP"
+        self.model = "S19j XP"
         self.expected_chips = 114
         self.expected_hashboards = 3
         self.fan_count = 0

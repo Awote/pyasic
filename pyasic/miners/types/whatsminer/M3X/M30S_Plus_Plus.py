@@ -99,6 +99,7 @@ class M30SPlusPlusVG50(WhatsMiner):  # noqa - ignore ABC method implementation
         self.ip = ip
         self.model = "M30S++ VG50"
         self.expected_chips = 0
+        # TODO: FIX
         warnings.warn(
             "Unknown chip count for miner type M30S++ VG50, please open an issue on GitHub (https://github.com/UpstreamData/pyasic)."
         )
