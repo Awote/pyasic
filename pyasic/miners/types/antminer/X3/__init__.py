@@ -16,3 +16,5 @@
 from .D3 import D3
 from .HS3 import HS3
 from .L3 import L3Plus
+from .KA3 import KA3
+from .KS3 import KS3

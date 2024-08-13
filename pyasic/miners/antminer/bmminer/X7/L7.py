@@ -18,6 +18,7 @@ from pyasic.miners.types import L7
 
 
 class BMMinerL7(AntminerModern, L7):
+    stock_nominal_hashrate = [7800, 8050, 8300, 8550, 8800, 9050, 9300, 9500]
     def __init__(self, ip: str, api_ver: str = "0.0.0"):
         super().__init__(ip, api_ver)
         self.supports_shutdown = False

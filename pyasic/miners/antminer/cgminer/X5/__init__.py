@@ -14,3 +14,4 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 from .DR5 import CGMinerDR5
+from .K5 import CGMinerK5

@@ -13,13 +13,24 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
+
 from pyasic.miners.makes import AntMiner
 
 
-class L7(AntMiner):  # noqa - ignore ABC method implementation
+class KS5(AntMiner):  # noqa - ignore ABC method implementation
     def __init__(self, ip: str, api_ver: str = "0.0.0"):
         super().__init__(ip, api_ver)
         self.ip = ip
-        self.model = "L7"
-        self.expected_chips = 120
+        self.model = "KS5"
+        self.expected_chips = 92
+        self.expected_hashboards = 3
+        self.fan_count = 2
+
+class KS5Pro(AntMiner):  # noqa - ignore ABC method implementation
+    def __init__(self, ip: str, api_ver: str = "0.0.0"):
+        super().__init__(ip, api_ver)
+        self.ip = ip
+        self.model = "KS5 Pro"
+        self.expected_chips = 92
+        self.expected_hashboards = 3
         self.fan_count = 2

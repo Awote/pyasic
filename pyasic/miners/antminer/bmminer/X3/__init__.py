@@ -15,3 +15,5 @@
 # ------------------------------------------------------------------------------
 from .HS3 import BMMinerHS3
 from .L3 import BMMinerL3Plus
+from .KA3 import BMMinerKA3
+from .KS3 import BMMinerKS3

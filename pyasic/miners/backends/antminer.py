@@ -204,7 +204,7 @@ class AntminerModern(BMMiner):
             api_stats = await self.api.send_command("stats", new_api=True)
         except APIError:
             return hashboards
-
+        
         if api_stats:
             try:
                 for board in api_stats["STATS"][0]["chain"]:

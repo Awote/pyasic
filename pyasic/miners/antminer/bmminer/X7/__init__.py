@@ -14,3 +14,4 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 from .L7 import BMMinerL7
+from .K7 import BMMinerK7

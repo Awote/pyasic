@@ -32,5 +32,10 @@ from .S19 import (
     S19Pro,
     S19ProHydro,
     S19ProPlus,
+    S19Hydro,
+    S19ProPlusHydro,
+    S19XPHydro,
+    S19jProA,
+    S19jXP
 )
 from .T19 import T19

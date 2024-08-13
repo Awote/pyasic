@@ -14,3 +14,4 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 from .L7 import L7
+from .K7 import K7

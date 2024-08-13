@@ -124,6 +124,14 @@ class S19jPro(AntMiner):  # noqa - ignore ABC method implementation
         self.expected_chips = 126
         self.fan_count = 4
 
+class S19jProA(AntMiner):
+    def __init__(self, ip: str, api_ver: str = "0.0.0"):
+        super().__init__(ip, api_ver)
+        self.ip = ip
+        self.model = "S19j Pro-A"
+        self.expected_chips = 126
+        self.fan_count = 4
+        
 class S19kPro(AntMiner):
     def __init__(self, ip: str, api_ver: str = "0.0.0"):
         super().__init__(ip, api_ver)
@@ -138,15 +146,6 @@ class S19jProPlus(AntMiner):  # noqa - ignore ABC method implementation
         self.ip = ip
         self.model = "S19j Pro+"
         self.expected_chips = 120
-        self.fan_count = 4
-
-
-class S19kPro(AntMiner):  # noqa - ignore ABC method implementation
-    def __init__(self, ip: str, api_ver: str = "0.0.0"):
-        super().__init__(ip, api_ver)
-        self.ip = ip
-        self.model = "S19k Pro"
-        self.expected_chips = 77
         self.fan_count = 4
 
 
@@ -167,6 +166,14 @@ class S19kProNoPIC(AntMiner):  # noqa - ignore ABC method implementation
         self.expected_chips = 77
         self.fan_count = 4
 
+class S19Hydro(AntMiner):  # noqa - ignore ABC method implementation
+    def __init__(self, ip: str, api_ver: str = "0.0.0"):
+        super().__init__(ip, api_ver)
+        self.ip = ip
+        self.model = "S19 Hydro"
+        self.expected_chips = 104
+        self.expected_hashboards = 4
+        self.fan_count = 0
 
 class S19ProHydro(AntMiner):  # noqa - ignore ABC method implementation
     def __init__(self, ip: str, api_ver: str = "0.0.0"):
@@ -175,4 +182,31 @@ class S19ProHydro(AntMiner):  # noqa - ignore ABC method implementation
         self.model = "S19 Pro Hydro"
         self.expected_chips = 180
         self.expected_hashboards = 4
+        self.fan_count = 0
+
+class S19ProPlusHydro(AntMiner):
+    def __init__(self, ip: str, api_ver: str = "0.0.0"):
+        super().__init__(ip, api_ver)
+        self.ip = ip
+        self.model = "Antminer S19 Pro+ Hydro"
+        self.expected_chips = 180
+        self.expected_hashboards = 4
+        self.fan_count = 0
+
+class S19XPHydro(AntMiner):
+    def __init__(self, ip: str, api_ver: str = "0.0.0"):
+        super().__init__(ip, api_ver)
+        self.ip = ip
+        self.model = "Antminer S19 XP Hydro"
+        self.expected_chips = 204
+        self.expected_hashboards = 3
+        self.fan_count = 0
+
+class S19jXP(AntMiner):
+    def __init__(self,ip:str, api_ver:str = "0.0.0"):
+        super().__init__(ip, api_ver)
+        self.ip = ip
+        self.model = "Antminer S19j XP"
+        self.expected_chips = 114
+        self.expected_hashboards = 3
         self.fan_count = 0

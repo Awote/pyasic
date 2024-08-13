@@ -21,4 +21,5 @@ from pyasic.miners.types import T19
 
 
 class BMMinerT19(AntminerModern, T19):
+    stock_nominal_hashrate = [84000, 88000]
     pass

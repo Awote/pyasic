@@ -13,13 +13,13 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-from pyasic.miners.makes import AntMiner
+
+from pyasic.miners.backends import AntminerModern
+from pyasic.miners.types import KS3
 
 
-class L7(AntMiner):  # noqa - ignore ABC method implementation
+class BMMinerKS3(AntminerModern, KS3):
+    stock_nominal_hashrate = [7300, 8200, 8300, 9400]
     def __init__(self, ip: str, api_ver: str = "0.0.0"):
         super().__init__(ip, api_ver)
-        self.ip = ip
-        self.model = "L7"
-        self.expected_chips = 120
-        self.fan_count = 2
+        self.supports_shutdown = False

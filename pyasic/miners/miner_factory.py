@@ -64,9 +64,15 @@ MINER_CLASSES = {
         None: BMMiner,
         "ANTMINER D3": CGMinerD3,
         "ANTMINER HS3": BMMinerHS3,
+        "ANTMINER KA3": BMMinerKA3,
+        "ANTMINER KS3": BMMinerKS3,
+        "ANTMINER KS5": BMMinerKS5,
+        "ANTMINER KS5 PRO": BMMinerKS5Pro,
         "ANTMINER L3+": BMMinerL3Plus,
         "ANTMINER DR5": CGMinerDR5,
+        "ANTMINER K5": CGMinerK5,
         "ANTMINER L7": BMMinerL7,
+        "ANTMINER K7": BMMinerK7,
         "ANTMINER E9 PRO": BMMinerE9Pro,
         "ANTMINER S9": BMMinerS9,
         "ANTMINER S9I": BMMinerS9i,
@@ -81,6 +87,7 @@ MINER_CLASSES = {
         "ANTMINER T17+": BMMinerT17Plus,
         "ANTMINER T17E": BMMinerT17e,
         "ANTMINER S19": BMMinerS19,
+        "ANTMINER S19 HYD.": BMMinerS19Hydro,
         "ANTMINER S19L": BMMinerS19L,
         "ANTMINER S19 PRO": BMMinerS19Pro,
         "ANTMINER S19J": BMMinerS19j,
@@ -93,11 +100,17 @@ MINER_CLASSES = {
         "ANTMINER S19A": BMMinerS19a,
         "ANTMINER S19A PRO": BMMinerS19aPro,
         "ANTMINER S19 PRO HYD.": BMMinerS19ProHydro,
+        "ANTMINER S19 PRO+ HYD.": BMMinerS19ProPlusHydro,
         "ANTMINER T19": BMMinerT19,
-        "ANTMINER BHB42621":BMMinerBHB42621,
+        "ANTMINER BHB42621": BMMinerBHB42621,
         "ANTMINER S19K PRO": BMMinerS19kPro,
-        "ANTMINER S21":BMMinerS21,
-        "ANTMINER T21": BMMinerT21
+        "ANTMINER S21": BMMinerS21,
+        "ANTMINER T21": BMMinerT21,
+        "ANTMINER S19J PRO-A": BMMinerS19jProA,
+        "ANTMINER S19J PRO+":BMMinerS19jProPlus,
+        "ANTMINER S19 XP HYD.": BMMinerS19XPHydro,
+        "ANTMINER S19J XP":BMMinerS19jXP
+
     },
     MinerTypes.WHATSMINER: {
         None: BTMiner,
@@ -364,7 +377,7 @@ MINER_CLASSES = {
         "ANTMINER S19XP": BOSMinerS19XP,
         "ANTMINER T19": BOSMinerT19,
         "ANTMINER BHB42621": BOSMinerBHB42621,
-        "ANTMINER S19 XP": BOSMinerS19XP
+        "ANTMINER S19 XP": BOSMinerS19XP,
     },
     MinerTypes.VNISH: {
         None: VNish,
