@@ -35,9 +35,9 @@ from pyasic.miners.types import (
     S19XPHydro,
     S19jProA,
     S19jProPlus,
-    S19jXP
-    # S19kProNoPIC,
-    # S19NoPIC
+    S19jXP,
+    S19kProNoPIC,
+    S19NoPIC,
 )
 
 
@@ -134,4 +134,10 @@ class BMMinerS19jProPlus(AntminerModern, S19jProPlus):
 
 class BMMinerS19jXP(AntminerModern, S19jXP):
     stock_nominak_hashrate = [134000, 136000, 139000, 143000, 151000]
+    pass
+
+class BMMinerS19kProNoPIC(AntminerModern, S19kProNoPIC):
+    pass
+
+class BMMinerS19NoPIC(AntminerModern, S19NoPIC):
     pass

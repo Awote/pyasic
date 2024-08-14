@@ -14,12 +14,4 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from pyasic.miners.backends import AntminerOld
-from pyasic.miners.types import Z15
-
-
-class CGMinerZ15(AntminerOld, Z15):
-    stock_nominal_hashrate = [0.420]
-    def __init__(self, ip: str, api_ver: str = "0.0.0"):
-        super().__init__(ip, api_ver)
-        self.supports_shutdown = False
+from .Z11 import Z11

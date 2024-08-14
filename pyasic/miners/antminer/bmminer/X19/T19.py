@@ -15,11 +15,15 @@
 # ------------------------------------------------------------------------------
 
 from pyasic.miners.backends import AntminerModern
-from pyasic.miners.types import T19
+from pyasic.miners.types import T19, T19Hydro
 
 # noqa - Ignore access to _module
 
 
 class BMMinerT19(AntminerModern, T19):
     stock_nominal_hashrate = [84000, 88000]
+    pass
+
+class BMMinerT19Hydro(AntminerModern, T19Hydro):
+    stock_nominal_hashrate = [119000, 125500, 132000, 138500, 145000, 158000]
     pass

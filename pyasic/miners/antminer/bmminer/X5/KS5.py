@@ -24,7 +24,7 @@ class BMMinerKS5(AntminerModern, KS5):
         super().__init__(ip, api_ver)
         self.supports_shutdown = False
 
-class BMMinerKS5Pro(AntminerModern, KS5):
+class BMMinerKS5Pro(AntminerModern, KS5Pro):
     stock_nominal_hashrate = [21000]
     def __init__(self, ip: str, api_ver: str = "0.0.0"):
         super().__init__(ip, api_ver)

@@ -36,6 +36,6 @@ from .S19 import (
     S19ProPlusHydro,
     S19XPHydro,
     S19jProA,
-    S19jXP
+    S19jXP,
 )
-from .T19 import T19
+from .T19 import T19, T19Hydro

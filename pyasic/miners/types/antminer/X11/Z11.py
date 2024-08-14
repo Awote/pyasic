@@ -14,12 +14,12 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from pyasic.miners.backends import AntminerOld
-from pyasic.miners.types import Z15
+from pyasic.miners.makes import AntMiner
 
-
-class CGMinerZ15(AntminerOld, Z15):
-    stock_nominal_hashrate = [0.420]
+class Z11(AntMiner):  # noqa - ignore ABC method implementation
     def __init__(self, ip: str, api_ver: str = "0.0.0"):
         super().__init__(ip, api_ver)
-        self.supports_shutdown = False
+        self.ip = ip
+        self.model = "Z11"
+        self.expected_chips = 3
+        self.fan_count = 2
