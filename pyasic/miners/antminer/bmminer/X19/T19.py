@@ -21,9 +21,9 @@ from pyasic.miners.types import T19, T19Hydro
 
 
 class BMMinerT19(AntminerModern, T19):
-    stock_nominal_hashrate = [84000, 88000]
+    stock_nominal_hashrate = [84, 88]
     pass
 
 class BMMinerT19Hydro(AntminerModern, T19Hydro):
-    stock_nominal_hashrate = [119000, 125500, 132000, 138500, 145000, 158000]
+    stock_nominal_hashrate = [119, 125.5, 132, 138.5, 145, 158]
     pass

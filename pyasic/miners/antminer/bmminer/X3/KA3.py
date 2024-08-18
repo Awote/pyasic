@@ -19,7 +19,7 @@ from pyasic.miners.types import KA3
 
 
 class BMMinerKA3(AntminerModern, KA3):
-    stock_nominal_hashrate = [166000, 173000]
+    stock_nominal_hashrate = [166, 173]
     def __init__(self, ip: str, api_ver: str = "0.0.0"):
         super().__init__(ip, api_ver)
         self.supports_shutdown = False

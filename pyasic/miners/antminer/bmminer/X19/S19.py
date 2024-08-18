@@ -42,7 +42,7 @@ from pyasic.miners.types import (
 
 
 class BMMinerS19(AntminerModern, S19):
-    stock_nominal_hashrate = [82000, 86000, 90000, 92000, 95000]
+    stock_nominal_hashrate = [82, 86, 90, 92, 95]
     pass
 
 
@@ -55,7 +55,7 @@ class BMMinerS19i(AntminerModern, S19i):
 
 
 class BMMinerS19Pro(AntminerModern, S19Pro):
-    stock_nominal_hashrate = [100000, 104000, 105000, 110000, 92000, 96000]
+    stock_nominal_hashrate = [100, 104, 105, 110, 92, 96]
     pass
 
 
@@ -64,22 +64,22 @@ class BMMinerS19ProPlus(AntminerModern, S19ProPlus):
 
 
 class BMMinerS19XP(AntminerModern, S19XP):
-    stock_nominal_hashrate = [119000, 127000, 134000, 141000, 140000, 151000]
+    stock_nominal_hashrate = [119, 127, 134, 141, 140, 151]
     pass
 
 
 class BMMinerS19a(AntminerModern, S19a):
-    stock_nominal_hashrate = [88000, 92000, 96000, 100000]
+    stock_nominal_hashrate = [88, 92, 96, 100]
     pass
 
 
 class BMMinerS19aPro(AntminerModern, S19aPro):
-    stock_nominal_hashrate = [102000, 106000, 110000]
+    stock_nominal_hashrate = [102, 106, 110]
     pass
 
 
 class BMMinerS19j(AntminerModern, S19j):
-    stock_nominal_hashrate = [82000, 86000, 90000, 94000, 100000]
+    stock_nominal_hashrate = [82, 86, 90, 94, 100]
     pass
 
 
@@ -88,7 +88,7 @@ class BMMinerS19jNoPIC(AntminerModern, S19jNoPIC):
 
 
 class BMMinerS19jPro(AntminerModern, S19jPro):
-    stock_nominal_hashrate = [100000, 104000, 84000, 88000, 92000, 96000, 98000]
+    stock_nominal_hashrate = [100, 104, 84, 88, 92, 96, 98]
     pass
 
 
@@ -97,7 +97,7 @@ class BMMinerS19L(AntminerModern, S19L):
 
 
 class BMMinerS19ProHydro(AntminerModern, S19ProHydro):
-    stock_nominal_hashrate = [154500, 162000, 163000, 169500, 170000, 177000, 184000]
+    stock_nominal_hashrate = [154.5, 162, 163, 169.5, 170, 177, 184]
     pass
 
 
@@ -106,34 +106,34 @@ class BMMinerBHB42621(BMMinerS19jPro):
 
 
 class BMMinerS19kPro(AntminerModern, S19kPro):
-    stock_nominal_hashrate = [110000, 115000, 120000]
+    stock_nominal_hashrate = [110, 115, 120]
     pass
 
 
 class BMMinerS19Hydro(AntminerModern, S19Hydro):
-    stock_nominal_hashrate = [132000, 138500, 145000, 151500, 158000]
+    stock_nominal_hashrate = [132, 138.5, 145, 151.5, 158]
     pass
 
 
 class BMMinerS19ProPlusHydro(AntminerModern, S19ProPlusHydro):
-    stock_nominal_hashrate = [170000, 177000, 184000, 191000, 198000]
+    stock_nominal_hashrate = [170, 177, 184, 191, 198]
     pass
 
 
 class BMMinerS19XPHydro(AntminerModern, S19XPHydro):
-    stock_nominal_hashrate = [224000, 235000, 246000, 255000, 257000]
+    stock_nominal_hashrate = [224, 235, 246, 255, 257]
     pass
 
 class BMMinerS19jProA(AntminerModern, S19jProA):
-    stock_nominal_hashrate = [84000, 88000, 92000, 96000, 100000, 104000, 11300]
+    stock_nominal_hashrate = [84, 88, 92, 96, 100, 104, 113]
     pass
 
 class BMMinerS19jProPlus(AntminerModern, S19jProPlus):
-    stock_nominal_hashrate = [113000, 109000, 117000, 120000]
+    stock_nominal_hashrate = [113, 109, 117, 120]
     pass    
 
 class BMMinerS19jXP(AntminerModern, S19jXP):
-    stock_nominak_hashrate = [134000, 136000, 139000, 143000, 151000]
+    stock_nominak_hashrate = [134, 136 ,139, 143, 151]
     pass
 
 class BMMinerS19kProNoPIC(AntminerModern, S19kProNoPIC):
