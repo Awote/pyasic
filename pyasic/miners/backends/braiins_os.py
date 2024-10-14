@@ -925,16 +925,16 @@ class BOSer(BraiinsOSFirmware):
             except APIError:
                 pass
 
-        if grpc_hashboards is not None:
+        if grpc_hashboards is not None and len(grpc_hashboards) > 0:
             grpc_boards = sorted(
                 grpc_hashboards["hashboards"], key=lambda x: int(x["id"])
             )
             for idx, board in enumerate(grpc_boards):
                 if board.get("chipsCount") is not None:
                     hashboards[idx].chips = board["chipsCount"]
-                if board.get("boardTemp") is not None:
+                if board.get("boardTemp") is not None and len(board.get("boardTemp",{})) > 0:
                     hashboards[idx].temp = board["boardTemp"]["degreeC"]
-                if board.get("highestChipTemp") is not None:
+                if board.get("highestChipTemp") is not None and len(board.get("highestChipTemp")) > 0:
                     hashboards[idx].chip_temp = board["highestChipTemp"]["temperature"][
                         "degreeC"
                     ]
@@ -1093,7 +1093,7 @@ class BOSer(BraiinsOSFirmware):
                     get_failures=0,
                     remote_failures=0,
                     active=pool_info.get("active", False),
-                    alive=pool_info["alive"],
+                    alive=pool_info.get("alive",False),
                 )
                 pools_data.append(pool_data)
 

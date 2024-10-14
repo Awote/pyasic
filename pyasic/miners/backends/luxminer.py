@@ -237,7 +237,10 @@ class LUXMiner(LuxOSFirmware):
                             hashboard.temp = round(temp)
 
                         hashrate = boards[1].get(f"chain_rate{i}")
+                            
                         if hashrate:
+                            if isinstance(hashrate,str):
+                                hashrate = float(hashrate)
                             hashboard.hashrate = AlgoHashRate.SHA256(
                                 hashrate, HashUnit.SHA256.GH
                             ).into(self.algo.unit.default)
