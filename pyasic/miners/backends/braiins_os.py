@@ -798,7 +798,7 @@ class BOSer(BraiinsOSFirmware):
     async def set_power_limit(self, wattage: int) -> bool:
         try:
             result = await self.web.set_power_target(
-                wattage, save_action=SaveAction.SAVE_ACTION_SAVE_AND_FORCE_APPLY
+                wattage, save_action=SaveAction.SAVE_AND_FORCE_APPLY
             )
         except APIError:
             return False
@@ -932,9 +932,15 @@ class BOSer(BraiinsOSFirmware):
             for idx, board in enumerate(grpc_boards):
                 if board.get("chipsCount") is not None:
                     hashboards[idx].chips = board["chipsCount"]
-                if board.get("boardTemp") is not None and len(board.get("boardTemp",{})) > 0:
+                if (
+                    board.get("boardTemp") is not None
+                    and len(board.get("boardTemp", {})) > 0
+                ):
                     hashboards[idx].temp = board["boardTemp"]["degreeC"]
-                if board.get("highestChipTemp") is not None and len(board.get("highestChipTemp")) > 0:
+                if (
+                    board.get("highestChipTemp") is not None
+                    and len(board.get("highestChipTemp")) > 0
+                ):
                     hashboards[idx].chip_temp = board["highestChipTemp"]["temperature"][
                         "degreeC"
                     ]
@@ -1093,7 +1099,7 @@ class BOSer(BraiinsOSFirmware):
                     get_failures=0,
                     remote_failures=0,
                     active=pool_info.get("active", False),
-                    alive=pool_info.get("alive",False),
+                    alive=pool_info.get("alive", False),
                 )
                 pools_data.append(pool_data)
 

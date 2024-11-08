@@ -222,6 +222,18 @@ class Pool(MinerConfigValue):
             password=web_system_info.get("stratumPassword", ""),
         )
 
+    @classmethod
+    def from_luxos(cls, rpc_pools: dict) -> "Pool":
+        return cls.from_api(rpc_pools)
+
+    @classmethod
+    def from_iceriver(cls, web_pool: dict) -> "Pool":
+        return cls(
+            url=web_pool["addr"],
+            user=web_pool["user"],
+            password=web_pool["pass"],
+        )
+
 
 @dataclass
 class PoolGroup(MinerConfigValue):
@@ -402,6 +414,15 @@ class PoolGroup(MinerConfigValue):
     def from_bitaxe(cls, web_system_info: dict) -> "PoolGroup":
         return cls(pools=[Pool.from_bitaxe(web_system_info)])
 
+    @classmethod
+    def from_iceriver(cls, web_userpanel: dict) -> "PoolGroup":
+        return cls(
+            pools=[
+                Pool.from_iceriver(web_pool)
+                for web_pool in web_userpanel["data"]["pools"]
+            ]
+        )
+
 
 @dataclass
 class PoolConfig(MinerConfigValue):
@@ -467,7 +488,7 @@ class PoolConfig(MinerConfigValue):
     def as_boser(self, user_suffix: str = None) -> dict:
         return {
             "set_pool_groups": SetPoolGroupsRequest(
-                save_action=SaveAction.SAVE_ACTION_SAVE_AND_APPLY,
+                save_action=SaveAction.SAVE_AND_APPLY,
                 pool_groups=[g.as_boser(user_suffix=user_suffix) for g in self.groups],
             )
         }
@@ -505,6 +526,9 @@ class PoolConfig(MinerConfigValue):
 
     def as_bitaxe(self, user_suffix: str = None) -> dict:
         return self.groups[0].as_bitaxe(user_suffix=user_suffix)
+
+    def as_luxos(self, user_suffix: str = None) -> dict:
+        return {}
 
     @classmethod
     def from_api(cls, api_pools: dict) -> "PoolConfig":
@@ -568,3 +592,24 @@ class PoolConfig(MinerConfigValue):
     @classmethod
     def from_bitaxe(cls, web_system_info: dict) -> "PoolConfig":
         return cls(groups=[PoolGroup.from_bitaxe(web_system_info)])
+
+    @classmethod
+    def from_iceriver(cls, web_userpanel: dict) -> "PoolConfig":
+        return cls(groups=[PoolGroup.from_iceriver(web_userpanel)])
+
+    @classmethod
+    def from_luxos(cls, rpc_groups: dict, rpc_pools: dict) -> "PoolConfig":
+        return cls(
+            groups=[
+                PoolGroup(
+                    pools=[
+                        Pool.from_luxos(pool)
+                        for pool in rpc_pools["POOLS"]
+                        if pool["GROUP"] == group["GROUP"]
+                    ],
+                    name=group["Name"],
+                    quota=group["Quota"],
+                )
+                for group in rpc_groups["GROUPS"]
+            ]
+        )

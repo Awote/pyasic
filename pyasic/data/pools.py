@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 class Scheme(Enum):
     STRATUM_V1 = "stratum+tcp"
     STRATUM_V2 = "stratum2+tcp"
+    STRATUM_V1_SSL = "stratum+ssl"
 
 
 @dataclass
@@ -25,7 +26,10 @@ class PoolUrl:
     @classmethod
     def from_str(cls, url: str) -> "PoolUrl":
         parsed_url = urlparse(url)
-        scheme = Scheme(parsed_url.scheme)
+        if not parsed_url.scheme.strip() == "":
+            scheme = Scheme(parsed_url.scheme)
+        else:
+            scheme = Scheme.STRATUM_V1
         host = parsed_url.hostname
         port = parsed_url.port
         pubkey = parsed_url.path.lstrip("/") if scheme == Scheme.STRATUM_V2 else None
@@ -85,6 +89,8 @@ class PoolMetrics:
     @staticmethod
     def _calculate_percentage(value: int, total: int) -> float:
         """Calculate the percentage."""
+        if value is None or total is None:
+            return 0
         if total == 0:
             return 0
         return (value / total) * 100

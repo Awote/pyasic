@@ -21,3 +21,9 @@ class Z15(AntMinerMake):
     raw_model = MinerModel.ANTMINER.Z15
 
     expected_chips = 3
+
+
+class Z15Pro(AntMinerMake):
+    raw_model = MinerModel.ANTMINER.Z15Pro
+
+    expected_chips = 6

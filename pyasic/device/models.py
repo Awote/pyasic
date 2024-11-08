@@ -5,14 +5,19 @@ class AntminerModels(str, Enum):
     D3 = "D3"
     HS3 = "HS3"
     L3Plus = "L3+"
+    KA3 = "KA3"
+    KS3 = "KS3"
     DR5 = "DR5"
+    KS5 = "KS5"
     L7 = "L7"
+    K7 = "K7"
     E9Pro = "E9Pro"
     S9 = "S9"
     S9i = "S9i"
     S9j = "S9j"
     T9 = "T9"
     Z15 = "Z15"
+    Z15Pro = "Z15 Pro"
     S17 = "S17"
     S17Plus = "S17+"
     S17Pro = "S17 Pro"
@@ -220,6 +225,7 @@ class WhatsminerModels(str, Enum):
     M50VH60 = "M50 VH60"
     M50VH70 = "M50 VH70"
     M50VH80 = "M50 VH80"
+    M50VH90 = "M50 VH90"
     M50VJ10 = "M50 VJ10"
     M50VJ20 = "M50 VJ20"
     M50VJ30 = "M50 VJ30"
@@ -293,6 +299,8 @@ class AvalonminerModels(str, Enum):
 class InnosiliconModels(str, Enum):
     T3HPlus = "T3H+"
     A10X = "A10X"
+    A11 = "A11"
+    A11MX = "A11MX"
 
     def __str__(self):
         return self.value
@@ -341,7 +349,15 @@ class BitAxeModels(str, Enum):
 
 
 class IceRiverModels(str, Enum):
+    KS0 = "KS0"
+    KS1 = "KS1"
     KS2 = "KS2"
+    KS3 = "KS3"
+    KS3L = "KS3L"
+    KS3M = "KS3M"
+    KS5 = "KS5"
+    KS5L = "KS5L"
+    KS5M = "KS5M"
 
     def __str__(self):
         return self.value

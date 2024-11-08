@@ -21,18 +21,22 @@ details {
                     <li><a href="../antminer/X3#d3-stock">D3 (Stock)</a></li>
                     <li><a href="../antminer/X3#hs3-stock">HS3 (Stock)</a></li>
                     <li><a href="../antminer/X3#l3_1-stock">L3+ (Stock)</a></li>
+                    <li><a href="../antminer/X3#ka3-stock">KA3 (Stock)</a></li>
+                    <li><a href="../antminer/X3#ks3-stock">KS3 (Stock)</a></li>
                 </ul>
         </details>
         <details>
             <summary>X5 Series:</summary>
                 <ul>
                     <li><a href="../antminer/X5#dr5-stock">DR5 (Stock)</a></li>
+                    <li><a href="../antminer/X5#ks5-stock">KS5 (Stock)</a></li>
                 </ul>
         </details>
         <details>
             <summary>X7 Series:</summary>
                 <ul>
                     <li><a href="../antminer/X7#l7-stock">L7 (Stock)</a></li>
+                    <li><a href="../antminer/X7#k7-stock">K7 (Stock)</a></li>
                 </ul>
         </details>
         <details>
@@ -49,6 +53,7 @@ details {
             <summary>X15 Series:</summary>
                 <ul>
                     <li><a href="../antminer/X15#z15-stock">Z15 (Stock)</a></li>
+                    <li><a href="../antminer/X15#z15-pro-stock">Z15 Pro (Stock)</a></li>
                 </ul>
         </details>
         <details>
@@ -278,6 +283,7 @@ details {
                     <li><a href="../whatsminer/M5X#m50-vh60-stock">M50 VH60 (Stock)</a></li>
                     <li><a href="../whatsminer/M5X#m50-vh70-stock">M50 VH70 (Stock)</a></li>
                     <li><a href="../whatsminer/M5X#m50-vh80-stock">M50 VH80 (Stock)</a></li>
+                    <li><a href="../whatsminer/M5X#m50-vh90-stock">M50 VH90 (Stock)</a></li>
                     <li><a href="../whatsminer/M5X#m50-vj10-stock">M50 VJ10 (Stock)</a></li>
                     <li><a href="../whatsminer/M5X#m50-vj20-stock">M50 VJ20 (Stock)</a></li>
                     <li><a href="../whatsminer/M5X#m50-vj30-stock">M50 VJ30 (Stock)</a></li>
@@ -378,6 +384,12 @@ details {
                     <li><a href="../avalonminer/A12X#avalon-1246-stock">Avalon 1246 (Stock)</a></li>
                 </ul>
         </details>
+        <details>
+            <summary>nano Series:</summary>
+                <ul>
+                    <li><a href="../avalonminer/nano#avalon-nano-3-stock">Avalon Nano 3 (Stock)</a></li>
+                </ul>
+        </details>
     </ul>
 </details>
 <details>
@@ -393,6 +405,13 @@ details {
             <summary>A10X Series:</summary>
                 <ul>
                     <li><a href="../innosilicon/A10X#a10x-stock">A10X (Stock)</a></li>
+                </ul>
+        </details>
+        <details>
+            <summary>A11X Series:</summary>
+                <ul>
+                    <li><a href="../innosilicon/A11X#a11-stock">A11 (Stock)</a></li>
+                    <li><a href="../innosilicon/A11X#a11mx-stock">A11MX (Stock)</a></li>
                 </ul>
         </details>
     </ul>
@@ -470,6 +489,7 @@ details {
             <summary>X21 Series:</summary>
                 <ul>
                     <li><a href="../antminer/X21#s21-bos_1">S21 (BOS+)</a></li>
+                    <li><a href="../antminer/X21#t21-bos_1">T21 (BOS+)</a></li>
                 </ul>
         </details>
     </ul>
@@ -504,6 +524,7 @@ details {
                     <li><a href="../antminer/X19#s19-no-pic-vnish">S19 No PIC (VNish)</a></li>
                     <li><a href="../antminer/X19#s19-pro-vnish">S19 Pro (VNish)</a></li>
                     <li><a href="../antminer/X19#s19j-vnish">S19j (VNish)</a></li>
+                    <li><a href="../antminer/X19#s19j-pro-vnish">S19j Pro (VNish)</a></li>
                     <li><a href="../antminer/X19#s19j-pro-vnish">S19j Pro (VNish)</a></li>
                     <li><a href="../antminer/X19#s19a-vnish">S19a (VNish)</a></li>
                     <li><a href="../antminer/X19#s19a-pro-vnish">S19a Pro (VNish)</a></li>
@@ -661,7 +682,15 @@ details {
         <details>
             <summary>KSX Series:</summary>
                 <ul>
+                    <li><a href="../iceriver/KSX#ks0-stock">KS0 (Stock)</a></li>
+                    <li><a href="../iceriver/KSX#ks1-stock">KS1 (Stock)</a></li>
                     <li><a href="../iceriver/KSX#ks2-stock">KS2 (Stock)</a></li>
+                    <li><a href="../iceriver/KSX#ks3-stock">KS3 (Stock)</a></li>
+                    <li><a href="../iceriver/KSX#ks3l-stock">KS3L (Stock)</a></li>
+                    <li><a href="../iceriver/KSX#ks3m-stock">KS3M (Stock)</a></li>
+                    <li><a href="../iceriver/KSX#ks5-stock">KS5 (Stock)</a></li>
+                    <li><a href="../iceriver/KSX#ks5l-stock">KS5L (Stock)</a></li>
+                    <li><a href="../iceriver/KSX#ks5m-stock">KS5M (Stock)</a></li>
                 </ul>
         </details>
     </ul>
