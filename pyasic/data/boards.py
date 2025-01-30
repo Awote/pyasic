@@ -13,15 +13,16 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
+from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
 
-from .hashrate import AlgoHashRate
+from pydantic import BaseModel, field_serializer
+
+from pyasic.device.algorithm.hashrate import AlgoHashRateType
 
 
-@dataclass
-class HashBoard:
+class HashBoard(BaseModel):
     """A Dataclass to standardize hashboard data.
 
     Attributes:
@@ -39,16 +40,16 @@ class HashBoard:
     """
 
     slot: int = 0
-    hashrate: AlgoHashRate = None
-    temp: int = None
-    chip_temp: int = None
-    chips: int = None
-    expected_chips: int = None
-    serial_number: str = None
+    hashrate: AlgoHashRateType | None = None
+    temp: float | None = None
+    chip_temp: float | None = None
+    chips: int | None = None
+    expected_chips: int | None = None
+    serial_number: str | None = None
     missing: bool = True
-    tuned: bool = None
-    active: bool = None
-    voltage: float = None
+    tuned: bool | None = None
+    active: bool | None = None
+    voltage: float | None = None
 
     def get(self, __key: str, default: Any = None):
         try:

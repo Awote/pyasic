@@ -21,9 +21,10 @@ from typing import List, Optional
 import aiofiles
 
 from pyasic.config import MinerConfig, MiningModeConfig
-from pyasic.data import AlgoHashRate, Fan, HashBoard, HashUnit
+from pyasic.data import Fan, HashBoard
 from pyasic.data.error_codes import MinerErrorData, WhatsminerError
 from pyasic.data.pools import PoolMetrics, PoolUrl
+from pyasic.device.algorithm import AlgoHashRate
 from pyasic.errors import APIError
 from pyasic.miners.data import DataFunction, DataLocations, DataOptions, RPCAPICommand
 from pyasic.miners.device.firmware import StockFirmware
@@ -274,7 +275,7 @@ class BTMiner(StockFirmware):
                 cfg.mining_mode = MiningModeConfig.normal()
                 return cfg
 
-            cfg.mining_mode = MiningModeConfig.power_tuning(power_lim)
+            cfg.mining_mode = MiningModeConfig.power_tuning(power=power_lim)
             self.config = cfg
             return self.config
 
@@ -403,8 +404,9 @@ class BTMiner(StockFirmware):
 
         if rpc_summary is not None:
             try:
-                return AlgoHashRate.SHA256(
-                    rpc_summary["SUMMARY"][0]["MHS 1m"], HashUnit.SHA256.MH
+                return self.algo.hashrate(
+                    rate=float(rpc_summary["SUMMARY"][0]["MHS 1m"]),
+                    unit=self.algo.unit.MH,
                 ).into(self.algo.unit.default)
             except LookupError:
                 pass
@@ -424,21 +426,22 @@ class BTMiner(StockFirmware):
         if rpc_devs is not None:
             try:
                 for board in rpc_devs["DEVS"]:
-                    if len(hashboards) < board["ASC"] + 1:
+                    asc = board.get("ASC")
+                    if asc is None:
+                        asc = board["Slot"]
+                    if len(hashboards) < asc + 1:
                         hashboards.append(
-                            HashBoard(
-                                slot=board["ASC"], expected_chips=self.expected_chips
-                            )
+                            HashBoard(slot=asc, expected_chips=self.expected_chips)
                         )
                         self.expected_hashboards += 1
-                    hashboards[board["ASC"]].chip_temp = round(board["Chip Temp Avg"])
-                    hashboards[board["ASC"]].temp = round(board["Temperature"])
-                    hashboards[board["ASC"]].hashrate = AlgoHashRate.SHA256(
-                        board["MHS 1m"], HashUnit.SHA256.MH
+                    hashboards[asc].chip_temp = round(board["Chip Temp Avg"])
+                    hashboards[asc].temp = round(board["Temperature"])
+                    hashboards[asc].hashrate = self.algo.hashrate(
+                        rate=float(board["MHS 1m"]), unit=self.algo.unit.MH
                     ).into(self.algo.unit.default)
-                    hashboards[board["ASC"]].chips = board["Effective Chips"]
-                    hashboards[board["ASC"]].serial_number = board["PCB SN"]
-                    hashboards[board["ASC"]].missing = False
+                    hashboards[asc].chips = board["Effective Chips"]
+                    hashboards[asc].serial_number = board["PCB SN"]
+                    hashboards[asc].missing = False
             except LookupError:
                 pass
 
@@ -498,8 +501,8 @@ class BTMiner(StockFirmware):
             try:
                 if self.expected_fans > 0:
                     fans = [
-                        Fan(rpc_summary["SUMMARY"][0].get("Fan Speed In", 0)),
-                        Fan(rpc_summary["SUMMARY"][0].get("Fan Speed Out", 0)),
+                        Fan(speed=rpc_summary["SUMMARY"][0].get("Fan Speed In", 0)),
+                        Fan(speed=rpc_summary["SUMMARY"][0].get("Fan Speed Out", 0)),
                     ]
             except LookupError:
                 pass
@@ -583,8 +586,8 @@ class BTMiner(StockFirmware):
             try:
                 expected_hashrate = rpc_summary["SUMMARY"][0]["Factory GHS"]
                 if expected_hashrate:
-                    return AlgoHashRate.SHA256(
-                        expected_hashrate, HashUnit.SHA256.GH
+                    return self.algo.hashrate(
+                        rate=float(expected_hashrate), unit=self.algo.unit.GH
                     ).into(self.algo.unit.default)
 
             except LookupError:
@@ -690,7 +693,7 @@ class BTMiner(StockFirmware):
                 pass
         return pools_data
 
-    async def upgrade_firmware(self, file: Path):
+    async def upgrade_firmware(self, file: Path) -> str:
         """
         Upgrade the firmware of the Whatsminer device.
 

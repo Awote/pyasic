@@ -17,16 +17,20 @@ from .antminer import AntminerModern, AntminerOld
 from .auradine import Auradine
 from .avalonminer import AvalonMiner
 from .bfgminer import BFGMiner
+from .bitaxe import BitAxe
 from .bmminer import BMMiner
 from .braiins_os import BOSer, BOSMiner
 from .btminer import BTMiner
 from .cgminer import CGMiner
 from .epic import ePIC
 from .goldshell import GoldshellMiner
-from .hiveon import Hiveon
+from .hammer import BlackMiner
+from .hiveon import HiveonModern, HiveonOld
 from .iceriver import IceRiver
 from .innosilicon import Innosilicon
+from .luckyminer import LuckyMiner
 from .luxminer import LUXMiner
 from .marathon import MaraMiner
+from .unknown import UnknownMiner
 from .vnish import VNish
-from .whatsminer import M2X, M3X, M5X, M6X
+from .whatsminer import M2X, M3X, M5X, M6X, M7X

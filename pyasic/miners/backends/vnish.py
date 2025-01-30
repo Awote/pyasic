@@ -14,10 +14,11 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
+import logging
 from typing import Optional
 
 from pyasic import MinerConfig
-from pyasic.data import AlgoHashRate, HashUnit
+from pyasic.device.algorithm import AlgoHashRate
 from pyasic.errors import APIError
 from pyasic.miners.backends.bmminer import BMMiner
 from pyasic.miners.data import (
@@ -80,6 +81,10 @@ VNISH_DATA_LOC = DataLocations(
             "_is_mining",
             [WebAPICommand("web_summary", "summary")],
         ),
+        str(DataOptions.POOLS): DataFunction(
+            "_get_pools",
+            [RPCAPICommand("rpc_pools", "pools")],
+        ),
     }
 )
 
@@ -91,8 +96,15 @@ class VNish(VNishFirmware, BMMiner):
     web: VNishWebAPI
 
     supports_shutdown = True
+    supports_presets = True
+    supports_autotuning = True
 
     data_locations = VNISH_DATA_LOC
+
+    async def send_config(self, config: MinerConfig, user_suffix: str = None) -> None:
+        await self.web.post_settings(
+            miner_settings=config.as_vnish(user_suffix=user_suffix)
+        )
 
     async def restart_backend(self) -> bool:
         data = await self.web.restart_vnish()
@@ -203,8 +215,9 @@ class VNish(VNishFirmware, BMMiner):
 
         if rpc_summary is not None:
             try:
-                return AlgoHashRate.SHA256(
-                    rpc_summary["SUMMARY"][0]["GHS 5s"], HashUnit.SHA256.GH
+                return self.algo.hashrate(
+                    rate=float(rpc_summary["SUMMARY"][0]["GHS 5s"]),
+                    unit=self.algo.unit.GH,
                 ).into(self.algo.unit.default)
             except (LookupError, ValueError, TypeError):
                 pass
@@ -256,7 +269,32 @@ class VNish(VNishFirmware, BMMiner):
     async def get_config(self) -> MinerConfig:
         try:
             web_settings = await self.web.settings()
+            web_presets = await self.web.autotune_presets()
         except APIError:
             return self.config
-        self.config = MinerConfig.from_vnish(web_settings)
+        self.config = MinerConfig.from_vnish(web_settings, web_presets)
         return self.config
+
+    async def set_power_limit(self, wattage: int) -> bool:
+        config = await self.get_config()
+        valid_presets = [
+            preset.power
+            for preset in config.mining_mode.available_presets
+            if preset.tuned and preset.power <= wattage
+        ]
+        new_wattage = max(valid_presets)
+
+        # Set power to highest preset <= wattage
+        try:
+            await self.web.set_power_limit(new_wattage)
+            updated_settings = await self.web.settings()
+        except APIError:
+            raise
+        except Exception as e:
+            logging.warning(f"{self} - Failed to set power limit: {e}")
+            return False
+
+        if int(updated_settings["miner"]["overclock"]["preset"]) == new_wattage:
+            return True
+        else:
+            return False

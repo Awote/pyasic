@@ -15,14 +15,15 @@
 # ------------------------------------------------------------------------------
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from typing import TypeVar, Union
+
+from pydantic import Field
 
 from pyasic.config.base import MinerConfigOption, MinerConfigValue
 
 
-@dataclass
 class FanModeNormal(MinerConfigValue):
-    mode: str = field(init=False, default="normal")
+    mode: str = Field(init=False, default="normal")
     minimum_fans: int = 1
     minimum_speed: int = 0
 
@@ -80,16 +81,27 @@ class FanModeNormal(MinerConfigValue):
             },
         }
 
-    def as_bitaxe(self) -> dict:
+    def as_espminer(self) -> dict:
         return {"autoFanspeed": 1}
 
     def as_luxos(self) -> dict:
         return {"fanset": {"speed": -1, "min_fans": self.minimum_fans}}
 
+    def as_vnish(self) -> dict:
+        return {
+            "cooling": {
+                "fan_min_count": self.minimum_fans,
+                "fan_min_duty": self.minimum_speed,
+                "mode": {
+                    "name": "auto",
+                    "param": None,  # Target temp, must be set later...
+                },
+            }
+        }
 
-@dataclass
+
 class FanModeManual(MinerConfigValue):
-    mode: str = field(init=False, default="manual")
+    mode: str = Field(init=False, default="manual")
     speed: int = 100
     minimum_fans: int = 1
 
@@ -144,16 +156,27 @@ class FanModeManual(MinerConfigValue):
             },
         }
 
-    def as_bitaxe(self) -> dict:
+    def as_espminer(self) -> dict:
         return {"autoFanspeed": 0, "fanspeed": self.speed}
 
     def as_luxos(self) -> dict:
         return {"fanset": {"speed": self.speed, "min_fans": self.minimum_fans}}
 
+    def as_vnish(self) -> dict:
+        return {
+            "cooling": {
+                "fan_min_count": self.minimum_fans,
+                "fan_min_duty": self.speed,
+                "mode": {
+                    "name": "manual",
+                    "param": self.speed,  # Speed value
+                },
+            }
+        }
 
-@dataclass
+
 class FanModeImmersion(MinerConfigValue):
-    mode: str = field(init=False, default="immersion")
+    mode: str = Field(init=False, default="immersion")
 
     @classmethod
     def from_dict(cls, dict_conf: dict | None) -> "FanModeImmersion":
@@ -175,6 +198,9 @@ class FanModeImmersion(MinerConfigValue):
 
     def as_luxos(self) -> dict:
         return {"fanset": {"speed": 0, "min_fans": 0}}
+
+    def as_vnish(self) -> dict:
+        return {"cooling": {"mode": {"name": "immers"}}}
 
 
 class FanModeConfig(MinerConfigOption):
@@ -273,7 +299,7 @@ class FanModeConfig(MinerConfigOption):
         keys = temperature_conf.keys()
         if "auto" in keys:
             if "minimumRequiredFans" in keys:
-                return cls.normal(temperature_conf["minimumRequiredFans"])
+                return cls.normal(minimum_fans=temperature_conf["minimumRequiredFans"])
             return cls.normal()
         if "manual" in keys:
             conf = {}
@@ -282,6 +308,12 @@ class FanModeConfig(MinerConfigOption):
             if "minimumRequiredFans" in keys:
                 conf["minimum_fans"] = int(temperature_conf["minimumRequiredFans"])
             return cls.manual(**conf)
+        if "disabled" in keys:
+            conf = {}
+            if "fanSpeedRatio" in temperature_conf["disabled"].keys():
+                conf["speed"] = int(temperature_conf["disabled"]["fanSpeedRatio"])
+            return cls.manual(**conf)
+        return cls.default()
 
     @classmethod
     def from_auradine(cls, web_fan: dict):
@@ -300,7 +332,9 @@ class FanModeConfig(MinerConfigOption):
             mode = web_config["general-config"]["environment-profile"]
             if mode == "AirCooling":
                 if web_config["advance-config"]["override-fan-control"]:
-                    return cls.manual(web_config["advance-config"]["fan-fixed-percent"])
+                    return cls.manual(
+                        speed=web_config["advance-config"]["fan-fixed-percent"]
+                    )
                 return cls.normal()
             return cls.immersion()
         except LookupError:
@@ -308,7 +342,7 @@ class FanModeConfig(MinerConfigOption):
         return cls.default()
 
     @classmethod
-    def from_bitaxe(cls, web_system_info: dict):
+    def from_espminer(cls, web_system_info: dict):
         if web_system_info["autofanspeed"] == 1:
             return cls.normal()
         else:
@@ -333,3 +367,9 @@ class FanModeConfig(MinerConfigOption):
         except LookupError:
             pass
         return cls.default()
+
+
+FanMode = TypeVar(
+    "FanMode",
+    bound=Union[FanModeNormal, FanModeManual, FanModeImmersion],
+)

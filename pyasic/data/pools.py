@@ -1,7 +1,9 @@
-from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 from urllib.parse import urlparse
+
+from pydantic import BaseModel, computed_field, model_serializer
+from typing_extensions import Self
 
 
 class Scheme(Enum):
@@ -10,12 +12,15 @@ class Scheme(Enum):
     STRATUM_V1_SSL = "stratum+ssl"
 
 
-@dataclass
-class PoolUrl:
+class PoolUrl(BaseModel):
     scheme: Scheme
     host: str
     port: int
     pubkey: Optional[str] = None
+
+    @model_serializer
+    def serialize(self):
+        return str(self)
 
     def __str__(self) -> str:
         if self.scheme == Scheme.STRATUM_V2 and self.pubkey:
@@ -24,8 +29,10 @@ class PoolUrl:
             return f"{self.scheme.value}://{self.host}:{self.port}"
 
     @classmethod
-    def from_str(cls, url: str) -> "PoolUrl":
+    def from_str(cls, url: str) -> Self | None:
         parsed_url = urlparse(url)
+        if not parsed_url.hostname:
+            return None
         if not parsed_url.scheme.strip() == "":
             scheme = Scheme(parsed_url.scheme)
         else:
@@ -36,8 +43,7 @@ class PoolUrl:
         return cls(scheme=scheme, host=host, port=port, pubkey=pubkey)
 
 
-@dataclass
-class PoolMetrics:
+class PoolMetrics(BaseModel):
     """A dataclass to standardize pool metrics returned from miners.
     Attributes:
 
@@ -54,37 +60,29 @@ class PoolMetrics:
     pool_stale_percent: Percentage of stale shares by the pool.
     """
 
-    url: PoolUrl
-    accepted: int = None
-    rejected: int = None
-    get_failures: int = None
-    remote_failures: int = None
-    active: bool = None
-    alive: bool = None
-    index: int = None
-    user: str = None
-    pool_rejected_percent: float = field(init=False)
-    pool_stale_percent: float = field(init=False)
+    url: PoolUrl | None
+    accepted: int | None = None
+    rejected: int | None = None
+    get_failures: int | None = None
+    remote_failures: int | None = None
+    active: bool | None = None
+    alive: bool | None = None
+    index: int | None = None
+    user: str | None = None
 
+    @computed_field  # type: ignore[misc]
     @property
     def pool_rejected_percent(self) -> float:  # noqa - Skip PyCharm inspection
         """Calculate and return the percentage of rejected shares"""
         return self._calculate_percentage(self.rejected, self.accepted + self.rejected)
 
-    @pool_rejected_percent.setter
-    def pool_rejected_percent(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
     def pool_stale_percent(self) -> float:  # noqa - Skip PyCharm inspection
         """Calculate and return the percentage of stale shares."""
         return self._calculate_percentage(
             self.get_failures, self.accepted + self.rejected
         )
-
-    @pool_stale_percent.setter
-    def pool_stale_percent(self, val):
-        pass
 
     @staticmethod
     def _calculate_percentage(value: int, total: int) -> float:

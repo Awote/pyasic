@@ -20,10 +20,9 @@ from dataclasses import dataclass
 from pyasic.config.base import MinerConfigValue
 
 
-@dataclass
 class ScalingShutdown(MinerConfigValue):
     enabled: bool = False
-    duration: int = None
+    duration: int | None = None
 
     @classmethod
     def from_dict(cls, dict_conf: dict | None) -> "ScalingShutdown":
@@ -35,7 +34,9 @@ class ScalingShutdown(MinerConfigValue):
     def from_bosminer(cls, power_scaling_conf: dict):
         sd_enabled = power_scaling_conf.get("shutdown_enabled")
         if sd_enabled is not None:
-            return cls(sd_enabled, power_scaling_conf.get("shutdown_duration"))
+            return cls(
+                enabled=sd_enabled, duration=power_scaling_conf.get("shutdown_duration")
+            )
         return None
 
     @classmethod
@@ -43,9 +44,12 @@ class ScalingShutdown(MinerConfigValue):
         sd_enabled = power_scaling_conf.get("shutdownEnabled")
         if sd_enabled is not None:
             try:
-                return cls(sd_enabled, power_scaling_conf["shutdownDuration"]["hours"])
+                return cls(
+                    enabled=sd_enabled,
+                    duration=power_scaling_conf["shutdownDuration"]["hours"],
+                )
             except KeyError:
-                return cls(sd_enabled)
+                return cls(enabled=sd_enabled)
         return None
 
     def as_bosminer(self) -> dict:
@@ -60,11 +64,10 @@ class ScalingShutdown(MinerConfigValue):
         return {"enable_shutdown": self.enabled, "shutdown_duration": self.duration}
 
 
-@dataclass
 class ScalingConfig(MinerConfigValue):
-    step: int = None
-    minimum: int = None
-    shutdown: ScalingShutdown = None
+    step: int | None = None
+    minimum: int | None = None
+    shutdown: ScalingShutdown | None = None
 
     @classmethod
     def from_dict(cls, dict_conf: dict | None) -> "ScalingConfig":
@@ -78,7 +81,7 @@ class ScalingConfig(MinerConfigValue):
         return cls(**cls_conf)
 
     @classmethod
-    def from_bosminer(cls, toml_conf: dict, mode: str = None):
+    def from_bosminer(cls, toml_conf: dict, mode: str | None = None):
         if mode == "power":
             return cls._from_bosminer_power(toml_conf)
         if mode == "hashrate":
@@ -103,7 +106,7 @@ class ScalingConfig(MinerConfigValue):
             return cls(step=power_step, minimum=min_power, shutdown=sd_mode)
 
     @classmethod
-    def from_boser(cls, grpc_miner_conf: dict, mode: str = None):
+    def from_boser(cls, grpc_miner_conf: dict, mode: str | None = None):
         if mode == "power":
             return cls._from_boser_power(grpc_miner_conf)
         if mode == "hashrate":

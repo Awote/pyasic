@@ -1,5 +1,36 @@
 site_name: pyasic
 repo_url: https://github.com/UpstreamData/pyasic
+site_url: !ENV SITE_URL
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to auto mode
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
 nav:
 - Introduction: "index.md"
 - Miners:
@@ -50,6 +81,8 @@ nav:
         - Antminer X17: "miners/antminer/X17.md"
         - Antminer X19: "miners/antminer/X19.md"
         - Antminer X21: "miners/antminer/X21.md"
+        - Braiins Mini Miners: "miners/braiins/BMM.md"
+        - Avalon Nano: "miners/avalonminer/nano.md"
         - Avalon 7X: "miners/avalonminer/A7X.md"
         - Avalon 8X: "miners/avalonminer/A8X.md"
         - Avalon 9X: "miners/avalonminer/A9X.md"
@@ -60,8 +93,10 @@ nav:
         - Whatsminer M3X: "miners/whatsminer/M3X.md"
         - Whatsminer M5X: "miners/whatsminer/M5X.md"
         - Whatsminer M6X: "miners/whatsminer/M6X.md"
+        - Whatsminer M7X: "miners/whatsminer/M7X.md"
         - Innosilicon T3X: "miners/innosilicon/T3X.md"
         - Innosilicon A10X: "miners/innosilicon/A10X.md"
+        - Innosilicon A11X: "miners/innosilicon/A11X.md"
         - Goldshell X5: "miners/goldshell/X5.md"
         - Goldshell XMax: "miners/goldshell/XMax.md"
         - Goldshell XBox: "miners/goldshell/XBox.md"
@@ -70,6 +105,9 @@ nav:
         - Auradine AT: "miners/auradine/AT.md"
         - Blockminer: "miners/blockminer/blockminer.md"
         - BitAxe BM: "miners/bitaxe/BM.md"
+        - Hammer DX: "miners/hammer/DX.md"
+        - Iceriver KSX: "miners/iceriver/KSX.md"
+        - Volcminer DX: "miners/volcminer/DX.md"
     - Base Miner: "miners/base_miner.md"
 - Settings:
       - Settings: "settings/settings.md"

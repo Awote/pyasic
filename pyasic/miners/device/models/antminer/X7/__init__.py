@@ -13,5 +13,6 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
+from .D7 import D7
 from .K7 import K7
 from .L7 import L7

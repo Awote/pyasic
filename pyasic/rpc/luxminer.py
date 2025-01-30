@@ -137,6 +137,80 @@ class LUXMinerRPCAPI(BaseMinerRPCAPI):
         """
         return await self.send_command("asccount")
 
+    async def atm(self) -> dict:
+        """Get data for Advanced Thermal Management (ATM) configuration.
+        <details>
+            <summary>Expand</summary>
+
+        Returns:
+            A dictionary containing ATM configuration data:
+            - ATM: List containing a configuration object with:
+                - Enabled: Boolean indicating if ATM is enabled
+                - MaxProfile: Maximum frequency profile (e.g., "395MHz")
+                - MinProfile: Minimum frequency profile (e.g., "145MHz")
+                - PostRampMinutes: Minutes before ATM starts working after ramping
+                - StartupMinutes: Minutes before ATM starts working at systm startup
+                - TempWindow: Temperature window, before "Hot" in which ATM will change profiles
+            - STATUS: List containing a status object with:
+                - Code: Status code (e.g., 339)
+                - Description: Miner version
+                - Msg: Status message "ATM configuration values"
+                - STATUS: Status indicator
+                - When: Timestamp
+        </details>
+        """
+        return await self.send_command("atm")
+
+    async def atmset(
+        self,
+        enabled: bool = None,
+        startup_minutes: int = None,
+        post_ramp_minutes: int = None,
+        temp_window: int = None,
+        min_profile: str = None,
+        max_profile: str = None,
+        prevent_oc: bool = None,
+    ) -> dict:
+        """Sets the ATM configuration.
+        <details>
+            <summary>Expand</summary>
+
+        Parameters:
+            enabled: Enable or disable ATM
+            startup_minutes: Minimum time (minutes) before ATM starts at system startup
+            post_ramp_minutes: Minimum time (minutes) before ATM starts after ramping
+            temp_window: Number of degrees below "Hot" temperature where ATM begins adjusting profiles
+            min_profile: Lowest profile to use (e.g. "145MHz", "+1", "-2"). Empty string for unbounded
+            max_profile: Highest profile to use (e.g. "395MHz", "+1", "-2")
+            prevent_oc: When turning off ATM, revert to default profile if in higher profile
+
+        Returns:
+            A dictionary containing status information about the ATM configuration update:
+            - STATUS: List containing a status object with:
+                - Code: Status code (e.g., 340)
+                - Description: Miner version
+                - Msg: Confirmation message "Advanced Thermal Management configuration updated"
+                - STATUS: Status indicator
+                - When: Timestamp
+        </details>
+        """
+        atmset_data = []
+        if enabled is not None:
+            atmset_data.append(f"enabled={str(enabled).lower()}")
+        if startup_minutes is not None:
+            atmset_data.append(f"startup_minutes={startup_minutes}")
+        if post_ramp_minutes is not None:
+            atmset_data.append(f"post_ramp_minutes={post_ramp_minutes}")
+        if temp_window is not None:
+            atmset_data.append(f"temp_window={temp_window}")
+        if min_profile is not None:
+            atmset_data.append(f"min_profile={min_profile}")
+        if max_profile is not None:
+            atmset_data.append(f"max_profile={max_profile}")
+        if prevent_oc is not None:
+            atmset_data.append(f"prevent_oc={str(prevent_oc).lower()}")
+        return await self.send_privileged_command("atmset", *atmset_data)
+
     async def check(self, command: str) -> dict:
         """Check if the command `command` exists in LUXMiner.
         <details>
@@ -500,9 +574,6 @@ class LUXMinerRPCAPI(BaseMinerRPCAPI):
         <details>
             <summary>Expand</summary>
 
-        Parameters:
-            session_id: Session id from the logon command.
-
         Returns:
             Confirmation of logging off a session.
         </details>
@@ -556,20 +627,19 @@ class LUXMinerRPCAPI(BaseMinerRPCAPI):
         """
         return await self.send_command("profiles")
 
-    async def profileset(self, board_n: int, profile: str) -> dict:
-        """Set active profile for a board.
+    async def profileset(self, profile: str) -> dict:
+        """Set active profile for the system.
         <details>
             <summary>Expand</summary>
 
         Parameters:
-            board_n: The board to set the profile on.
             profile: The profile name to use.
 
         Returns:
-            A confirmation of setting the profile on board_n.
+            A confirmation of setting the profile.
         </details>
         """
-        return await self.send_privileged_command("profileset", board_n, profile)
+        return await self.send_privileged_command("profileset", profile)
 
     async def reboot(self, board_n: int, delay_s: int = None) -> dict:
         """Reboot a board.
@@ -771,7 +841,7 @@ class LUXMinerRPCAPI(BaseMinerRPCAPI):
         """
         return await self.send_privileged_command("voltageset", board_n, voltage)
 
-    async def upgraderun(self):
+    async def updaterun(self) -> dict:
         """
         Send the 'updaterun' command to the miner.
 

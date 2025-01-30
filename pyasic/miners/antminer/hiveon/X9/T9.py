@@ -18,9 +18,10 @@ from typing import List, Optional
 
 import asyncssh
 
-from pyasic.data import AlgoHashRate, HashBoard, HashUnit
+from pyasic.data import HashBoard
+from pyasic.device.algorithm import AlgoHashRate, HashUnit
 from pyasic.errors import APIError
-from pyasic.miners.backends import Hiveon
+from pyasic.miners.backends import HiveonOld
 from pyasic.miners.data import DataFunction, DataLocations, DataOptions, RPCAPICommand
 from pyasic.miners.device.models import T9
 
@@ -62,27 +63,20 @@ HIVEON_T9_DATA_LOC = DataLocations(
             "_get_uptime",
             [RPCAPICommand("rpc_stats", "stats")],
         ),
+        str(DataOptions.POOLS): DataFunction(
+            "_get_pools",
+            [RPCAPICommand("rpc_pools", "pools")],
+        ),
     }
 )
 
 
-class HiveonT9(Hiveon, T9):
+class HiveonT9(HiveonOld, T9):
     data_locations = HIVEON_T9_DATA_LOC
 
     ##################################################
     ### DATA GATHERING FUNCTIONS (get_{some_data}) ###
     ##################################################
-
-    async def get_mac(self):
-        try:
-            mac = (
-                (await self.send_ssh_command("cat /sys/class/net/eth0/address"))
-                .strip()
-                .upper()
-            )
-            return mac
-        except (TypeError, ValueError, asyncssh.Error, OSError, AttributeError):
-            pass
 
     async def _get_hashboards(self, rpc_stats: dict = None) -> List[HashBoard]:
         hashboards = [
@@ -122,28 +116,11 @@ class HiveonT9(Hiveon, T9):
                 except (KeyError, IndexError):
                     pass
             hashboards[board].hashrate = AlgoHashRate.SHA256(
-                hashrate, HashUnit.SHA256.GH
+                rate=float(hashrate), unit=HashUnit.SHA256.GH
             ).into(self.algo.unit.default)
             hashboards[board].chips = chips
 
         return hashboards
-
-    async def _get_wattage(self, rpc_stats: dict = None) -> Optional[int]:
-        if not rpc_stats:
-            try:
-                rpc_stats = await self.rpc.stats()
-            except APIError:
-                pass
-
-        if rpc_stats:
-            boards = rpc_stats.get("STATS")
-            try:
-                wattage_raw = boards[1]["chain_power"]
-            except (KeyError, IndexError):
-                pass
-            else:
-                # parse wattage position out of raw data
-                return round(float(wattage_raw.split(" ")[0]))
 
     async def _get_env_temp(self, rpc_stats: dict = None) -> Optional[float]:
         env_temp_list = []
@@ -168,4 +145,4 @@ class HiveonT9(Hiveon, T9):
                         pass
 
             if not env_temp_list == []:
-                return round(float(sum(env_temp_list) / len(env_temp_list)), 2)
+                return round(sum(env_temp_list) / len(env_temp_list))

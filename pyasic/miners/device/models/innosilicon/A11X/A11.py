@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
+from pyasic.device.algorithm import MinerAlgo
 from pyasic.device.models import MinerModel
 from pyasic.miners.device.makes import InnosiliconMake
 
@@ -21,3 +22,6 @@ class A11(InnosiliconMake):
     raw_model = MinerModel.INNOSILICON.A11
 
     expected_hashboards = 4
+    expected_chips = 8
+    expected_fans = 2
+    algo = MinerAlgo.ETHASH

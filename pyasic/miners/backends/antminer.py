@@ -16,12 +16,13 @@
 
 import logging
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from pyasic.config import MinerConfig, MiningModeConfig
-from pyasic.data import AlgoHashRate, Fan, HashBoard, HashUnit
+from pyasic.data import Fan, HashBoard
 from pyasic.data.error_codes import MinerErrorData, X19Error
 from pyasic.data.pools import PoolMetrics, PoolUrl
+from pyasic.device.algorithm import AlgoHashRate
 from pyasic.errors import APIError
 from pyasic.miners.backends.bmminer import BMMiner
 from pyasic.miners.backends.cgminer import CGMiner
@@ -183,13 +184,13 @@ class AntminerModern(BMMiner):
 
     async def stop_mining(self) -> bool:
         cfg = await self.get_config()
-        cfg.miner_mode = MiningModeConfig.sleep
+        cfg.mining_mode = MiningModeConfig.sleep()
         await self.send_config(cfg)
         return True
 
     async def resume_mining(self) -> bool:
         cfg = await self.get_config()
-        cfg.miner_mode = MiningModeConfig.normal
+        cfg.mining_mode = MiningModeConfig.normal()
         await self.send_config(cfg)
         return True
 
@@ -239,7 +240,7 @@ class AntminerModern(BMMiner):
                 for item in web_summary["SUMMARY"][0]["status"]:
                     try:
                         if not item["status"] == "s":
-                            errors.append(X19Error(item["msg"]))
+                            errors.append(X19Error(error_message=item["msg"]))
                     except KeyError:
                         continue
             except LookupError:
@@ -248,7 +249,7 @@ class AntminerModern(BMMiner):
 
     async def _get_hashboards(self) -> List[HashBoard]:
         hashboards = [
-            HashBoard(idx, expected_chips=self.expected_chips)
+            HashBoard(slot=idx, expected_chips=self.expected_chips)
             for idx in range(self.expected_hashboards)
         ]
 
@@ -260,8 +261,8 @@ class AntminerModern(BMMiner):
         if rpc_stats is not None:
             try:
                 for board in rpc_stats["STATS"][0]["chain"]:
-                    hashboards[board["index"]].hashrate = AlgoHashRate.SHA256(
-                        board["rate_real"], HashUnit.SHA256.GH
+                    hashboards[board["index"]].hashrate = self.algo.hashrate(
+                        rate=board["rate_real"], unit=self.algo.unit.GH
                     ).into(self.algo.unit.default)
                     hashboards[board["index"]].chips = board["asic_num"]
                     board_temp_data = list(
@@ -317,8 +318,8 @@ class AntminerModern(BMMiner):
                     rate_unit = rpc_stats["STATS"][1]["rate_unit"]
                 except KeyError:
                     rate_unit = "GH"
-                return AlgoHashRate.SHA256(
-                    expected_rate, HashUnit.SHA256.from_str(rate_unit)
+                return self.algo.hashrate(
+                    rate=float(expected_rate), unit=self.algo.unit.from_str(rate_unit)
                 ).into(self.algo.unit.default)
             except LookupError:
                 pass
@@ -597,44 +598,52 @@ class AntminerOld(CGMiner):
                 pass
 
         if rpc_stats is not None:
-            board_offset = -1
-            boards = rpc_stats["STATS"]
-            if len(boards) > 1:
-                for board_num in range(1, 16, 5):
-                    for _b_num in range(5):
-                        b = boards[1].get(f"chain_acn{board_num + _b_num}")
+            try:
+                board_offset = -1
+                boards = rpc_stats["STATS"]
+                if len(boards) > 1:
+                    for board_num in range(1, 16, 5):
+                        for _b_num in range(5):
+                            b = boards[1].get(f"chain_acn{board_num + _b_num}")
 
-                        if b and not b == 0 and board_offset == -1:
-                            board_offset = board_num
-                if board_offset == -1:
-                    board_offset = 1
+                            if b and not b == 0 and board_offset == -1:
+                                board_offset = board_num
+                    if board_offset == -1:
+                        board_offset = 1
 
-                for i in range(board_offset, board_offset + self.expected_hashboards):
-                    hashboard = HashBoard(
-                        slot=i - board_offset, expected_chips=self.expected_chips
-                    )
+                    for i in range(
+                        board_offset, board_offset + self.expected_hashboards
+                    ):
+                        hashboard = HashBoard(
+                            slot=i - board_offset, expected_chips=self.expected_chips
+                        )
 
-                    chip_temp = boards[1].get(f"temp{i}")
-                    if chip_temp:
-                        hashboard.chip_temp = round(chip_temp)
+                        chip_temp = boards[1].get(f"temp{i}")
+                        if chip_temp:
+                            hashboard.chip_temp = round(chip_temp)
 
-                    temp = boards[1].get(f"temp2_{i}")
-                    if temp:
-                        hashboard.temp = round(temp)
+                        temp = boards[1].get(f"temp2_{i}")
+                        if temp:
+                            hashboard.temp = round(temp)
 
-                    hashrate = boards[1].get(f"chain_rate{i}")
-                    if hashrate:
-                        hashboard.hashrate = AlgoHashRate.SHA256(
-                            float(hashrate), HashUnit.SHA256.GH
-                        ).into(self.algo.unit.default)
+                        hashrate = boards[1].get(f"chain_rate{i}")
+                        if hashrate:
+                            hashboard.hashrate = self.algo.hashrate(
+                                rate=float(hashrate), unit=self.algo.unit.GH
+                            ).into(self.algo.unit.default)
 
-                    chips = boards[1].get(f"chain_acn{i}")
-                    if chips:
-                        hashboard.chips = chips
-                        hashboard.missing = False
-                    if (not chips) or (not chips > 0):
-                        hashboard.missing = True
-                    hashboards.append(hashboard)
+                        chips = boards[1].get(f"chain_acn{i}")
+                        if chips:
+                            hashboard.chips = chips
+                            hashboard.missing = False
+                        if (not chips) or (not chips > 0):
+                            hashboard.missing = True
+                        hashboards.append(hashboard)
+            except LookupError:
+                return [
+                    HashBoard(slot=i, expected_chips=self.expected_chips)
+                    for i in range(self.expected_hashboards)
+                ]
 
         return hashboards
 

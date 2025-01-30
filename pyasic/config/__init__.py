@@ -13,25 +13,28 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-from dataclasses import asdict, dataclass, field
 
-from pyasic.config.fans import FanModeConfig
-from pyasic.config.mining import MiningModeConfig
+from pydantic import BaseModel, Field
+
+from pyasic.config.fans import FanMode, FanModeConfig, FanModeNormal
+from pyasic.config.mining import MiningMode, MiningModeConfig
 from pyasic.config.mining.scaling import ScalingConfig
 from pyasic.config.pools import PoolConfig
 from pyasic.config.temperature import TemperatureConfig
 from pyasic.misc import merge_dicts
 
 
-@dataclass
-class MinerConfig:
+class MinerConfig(BaseModel):
     """Represents the configuration for a miner including pool configuration,
     fan mode, temperature settings, mining mode, and power scaling."""
 
-    pools: PoolConfig = field(default_factory=PoolConfig.default)
-    fan_mode: FanModeConfig = field(default_factory=FanModeConfig.default)
-    temperature: TemperatureConfig = field(default_factory=TemperatureConfig.default)
-    mining_mode: MiningModeConfig = field(default_factory=MiningModeConfig.default)
+    class Config:
+        arbitrary_types_allowed = True
+
+    pools: PoolConfig = Field(default_factory=PoolConfig.default)
+    fan_mode: FanMode = Field(default_factory=FanModeConfig.default)
+    temperature: TemperatureConfig = Field(default_factory=TemperatureConfig.default)
+    mining_mode: MiningMode = Field(default_factory=MiningModeConfig.default)
 
     def __getitem__(self, item):
         try:
@@ -41,9 +44,9 @@ class MinerConfig:
 
     def as_dict(self) -> dict:
         """Converts the MinerConfig object to a dictionary."""
-        return asdict(self)
+        return self.model_dump()
 
-    def as_am_modern(self, user_suffix: str = None) -> dict:
+    def as_am_modern(self, user_suffix: str | None = None) -> dict:
         """Generates the configuration in the format suitable for modern Antminers."""
         return {
             **self.fan_mode.as_am_modern(),
@@ -53,7 +56,7 @@ class MinerConfig:
             **self.temperature.as_am_modern(),
         }
 
-    def as_wm(self, user_suffix: str = None) -> dict:
+    def as_wm(self, user_suffix: str | None = None) -> dict:
         """Generates the configuration in the format suitable for Whatsminers."""
         return {
             **self.fan_mode.as_wm(),
@@ -62,7 +65,7 @@ class MinerConfig:
             **self.temperature.as_wm(),
         }
 
-    def as_am_old(self, user_suffix: str = None) -> dict:
+    def as_am_old(self, user_suffix: str | None = None) -> dict:
         """Generates the configuration in the format suitable for old versions of Antminers."""
         return {
             **self.fan_mode.as_am_old(),
@@ -71,7 +74,7 @@ class MinerConfig:
             **self.temperature.as_am_old(),
         }
 
-    def as_goldshell(self, user_suffix: str = None) -> dict:
+    def as_goldshell(self, user_suffix: str | None = None) -> dict:
         """Generates the configuration in the format suitable for Goldshell miners."""
         return {
             **self.fan_mode.as_goldshell(),
@@ -80,7 +83,7 @@ class MinerConfig:
             **self.temperature.as_goldshell(),
         }
 
-    def as_avalon(self, user_suffix: str = None) -> dict:
+    def as_avalon(self, user_suffix: str | None = None) -> dict:
         """Generates the configuration in the format suitable for Avalonminers."""
         return {
             **self.fan_mode.as_avalon(),
@@ -89,7 +92,7 @@ class MinerConfig:
             **self.temperature.as_avalon(),
         }
 
-    def as_inno(self, user_suffix: str = None) -> dict:
+    def as_inno(self, user_suffix: str | None = None) -> dict:
         """Generates the configuration in the format suitable for Innosilicon miners."""
         return {
             **self.fan_mode.as_inno(),
@@ -98,7 +101,7 @@ class MinerConfig:
             **self.temperature.as_inno(),
         }
 
-    def as_bosminer(self, user_suffix: str = None) -> dict:
+    def as_bosminer(self, user_suffix: str | None = None) -> dict:
         """Generates the configuration in the bosminer.toml format."""
         return {
             **merge_dicts(self.fan_mode.as_bosminer(), self.temperature.as_bosminer()),
@@ -106,8 +109,8 @@ class MinerConfig:
             **self.pools.as_bosminer(user_suffix=user_suffix),
         }
 
-    def as_boser(self, user_suffix: str = None) -> dict:
-        """ "Generates the configuration in the format suitable for BOSer."""
+    def as_boser(self, user_suffix: str | None = None) -> dict:
+        """Generates the configuration in the format suitable for BOSer."""
         return {
             **self.fan_mode.as_boser(),
             **self.temperature.as_boser(),
@@ -115,7 +118,7 @@ class MinerConfig:
             **self.pools.as_boser(user_suffix=user_suffix),
         }
 
-    def as_epic(self, user_suffix: str = None) -> dict:
+    def as_epic(self, user_suffix: str | None = None) -> dict:
         """Generates the configuration in the format suitable for ePIC miners."""
         return {
             **merge_dicts(self.fan_mode.as_epic(), self.temperature.as_epic()),
@@ -123,7 +126,7 @@ class MinerConfig:
             **self.pools.as_epic(user_suffix=user_suffix),
         }
 
-    def as_auradine(self, user_suffix: str = None) -> dict:
+    def as_auradine(self, user_suffix: str | None = None) -> dict:
         """Generates the configuration in the format suitable for Auradine miners."""
         return {
             **self.fan_mode.as_auradine(),
@@ -132,7 +135,7 @@ class MinerConfig:
             **self.pools.as_auradine(user_suffix=user_suffix),
         }
 
-    def as_mara(self, user_suffix: str = None) -> dict:
+    def as_mara(self, user_suffix: str | None = None) -> dict:
         return {
             **self.fan_mode.as_mara(),
             **self.temperature.as_mara(),
@@ -140,21 +143,37 @@ class MinerConfig:
             **self.pools.as_mara(user_suffix=user_suffix),
         }
 
-    def as_bitaxe(self, user_suffix: str = None) -> dict:
+    def as_espminer(self, user_suffix: str | None = None) -> dict:
         return {
-            **self.fan_mode.as_bitaxe(),
-            **self.temperature.as_bitaxe(),
-            **self.mining_mode.as_bitaxe(),
-            **self.pools.as_bitaxe(user_suffix=user_suffix),
+            **self.fan_mode.as_espminer(),
+            **self.temperature.as_espminer(),
+            **self.mining_mode.as_espminer(),
+            **self.pools.as_espminer(user_suffix=user_suffix),
         }
 
-    def as_luxos(self, user_suffix: str = None) -> dict:
+    def as_luxos(self, user_suffix: str | None = None) -> dict:
         return {
             **self.fan_mode.as_luxos(),
             **self.temperature.as_luxos(),
             **self.mining_mode.as_luxos(),
             **self.pools.as_luxos(user_suffix=user_suffix),
         }
+
+    def as_vnish(self, user_suffix: str | None = None) -> dict:
+        main_cfg = {
+            "miner": {
+                **self.fan_mode.as_vnish(),
+                **self.temperature.as_vnish(),
+                **self.mining_mode.as_vnish(),
+                **self.pools.as_vnish(user_suffix=user_suffix),
+            }
+        }
+        if isinstance(self.fan_mode, FanModeNormal):
+            main_cfg["miner"]["cooling"]["mode"]["param"] = self.temperature.target
+        return main_cfg
+
+    def as_hammer(self, *args, **kwargs) -> dict:
+        return self.as_am_modern(*args, **kwargs)
 
     @classmethod
     def from_dict(cls, dict_conf: dict) -> "MinerConfig":
@@ -226,13 +245,13 @@ class MinerConfig:
         )
 
     @classmethod
-    def from_vnish(cls, web_settings: dict) -> "MinerConfig":
+    def from_vnish(cls, web_settings: dict, web_presets: list[dict]) -> "MinerConfig":
         """Constructs a MinerConfig object from web settings for VNish miners."""
         return cls(
             pools=PoolConfig.from_vnish(web_settings),
             fan_mode=FanModeConfig.from_vnish(web_settings),
             temperature=TemperatureConfig.from_vnish(web_settings),
-            mining_mode=MiningModeConfig.from_vnish(web_settings),
+            mining_mode=MiningModeConfig.from_vnish(web_settings, web_presets),
         )
 
     @classmethod
@@ -253,10 +272,10 @@ class MinerConfig:
         )
 
     @classmethod
-    def from_bitaxe(cls, web_system_info: dict) -> "MinerConfig":
+    def from_espminer(cls, web_system_info: dict) -> "MinerConfig":
         return cls(
-            pools=PoolConfig.from_bitaxe(web_system_info),
-            fan_mode=FanModeConfig.from_bitaxe(web_system_info),
+            pools=PoolConfig.from_espminer(web_system_info),
+            fan_mode=FanModeConfig.from_espminer(web_system_info),
         )
 
     @classmethod
@@ -267,7 +286,13 @@ class MinerConfig:
 
     @classmethod
     def from_luxos(
-        cls, rpc_tempctrl: dict, rpc_fans: dict, rpc_pools: dict, rpc_groups: dict
+        cls,
+        rpc_tempctrl: dict,
+        rpc_fans: dict,
+        rpc_pools: dict,
+        rpc_groups: dict,
+        rpc_config: dict,
+        rpc_profiles: dict,
     ) -> "MinerConfig":
         return cls(
             temperature=TemperatureConfig.from_luxos(rpc_tempctrl=rpc_tempctrl),
@@ -275,4 +300,15 @@ class MinerConfig:
                 rpc_tempctrl=rpc_tempctrl, rpc_fans=rpc_fans
             ),
             pools=PoolConfig.from_luxos(rpc_pools=rpc_pools, rpc_groups=rpc_groups),
+            mining_mode=MiningModeConfig.from_luxos(
+                rpc_config=rpc_config, rpc_profiles=rpc_profiles
+            ),
         )
+
+    @classmethod
+    def from_hammer(cls, *args, **kwargs) -> "MinerConfig":
+        return cls.from_am_modern(*args, **kwargs)
+
+    @classmethod
+    def from_hiveon_modern(cls, web_conf: dict) -> "MinerConfig":
+        return cls.from_am_modern(web_conf)

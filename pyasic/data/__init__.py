@@ -13,27 +13,27 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-
 import copy
-import json
 import time
-from dataclasses import asdict, dataclass, field, fields
 from datetime import datetime, timezone
 from typing import Any, List, Union
+
+from pydantic import BaseModel, Field, computed_field
 
 from pyasic.config import MinerConfig
 from pyasic.config.mining import MiningModePowerTune
 from pyasic.data.pools import PoolMetrics, Scheme
+from pyasic.device.algorithm.hashrate import AlgoHashRateType
+from pyasic.device.algorithm.hashrate.base import GenericHashrate
 
+from ..device.algorithm.hashrate.unit.base import GenericUnit
 from .boards import HashBoard
 from .device import DeviceInfo
 from .error_codes import BraiinsOSError, InnosiliconError, WhatsminerError, X19Error
 from .fans import Fan
-from .hashrate import AlgoHashRate, HashUnit
 
 
-@dataclass
-class MinerData:
+class MinerData(BaseModel):
     """A Dataclass to standardize data returned from miners (specifically `AnyMiner().get_data()`)
 
     Attributes:
@@ -50,8 +50,8 @@ class MinerData:
         fw_ver: The current firmware version on the miner as a str.
         hostname: The network hostname of the miner as a str.
         hashrate: The hashrate of the miner in TH/s as a float.  Calculated automatically.
-        _hashrate: Backup for hashrate found via API instead of hashboards.
         expected_hashrate: The factory nominal hashrate of the miner in TH/s as a float.
+        sticker_hashrate: The factory sticker hashrate of the miner as a float.
         hashboards: A list of [`HashBoard`][pyasic.data.HashBoard]s on the miner with their statistics.
         temperature_avg: The average temperature across the boards.  Calculated automatically.
         env_temp: The environment temps as a float.
@@ -77,58 +77,47 @@ class MinerData:
 
     # general
     ip: str
-    _datetime: datetime = field(repr=False, default=None)
-    datetime: str = field(init=False)
-    timestamp: int = field(init=False)
+    raw_datetime: datetime = Field(
+        exclude=True, default_factory=datetime.now(timezone.utc).astimezone, repr=False
+    )
 
     # about
-    device_info: DeviceInfo = None
-    make: str = field(init=False)
-    model: str = field(init=False)
-    firmware: str = field(init=False)
-    algo: str = field(init=False)
-    mac: str = None
-    api_ver: str = None
-    fw_ver: str = None
-    hostname: str = None
+    device_info: DeviceInfo | None = None
+    mac: str | None = None
+    api_ver: str | None = None
+    fw_ver: str | None = None
+    hostname: str | None = None
 
     # hashrate
-    hashrate: AlgoHashRate = field(init=False)
-    _hashrate: AlgoHashRate = field(repr=False, default=None)
+    raw_hashrate: AlgoHashRateType = Field(exclude=True, default=None, repr=False)
+
+    # sticker
+    sticker_hashrate: AlgoHashRateType | None = None
 
     # expected
-    expected_hashrate: float = None
-    expected_hashboards: int = None
-    expected_chips: int = None
-    expected_fans: int = None
-
-    # % expected
-    percent_expected_chips: float = field(init=False)
-    percent_expected_hashrate: float = field(init=False)
-    percent_expected_wattage: float = field(init=False)
+    expected_hashrate: AlgoHashRateType | None = None
+    expected_hashboards: int | None = None
+    expected_chips: int | None = None
+    expected_fans: int | None = None
 
     # temperature
-    temperature_avg: int = field(init=False)
-    env_temp: float = None
+    env_temp: float | None = None
 
     # power
-    wattage: int = None
-    wattage_limit: int = field(init=False)
-    voltage: float = None
-    _wattage_limit: int = field(repr=False, default=None)
+    wattage: int | None = None
+    voltage: float | None = None
+    raw_wattage_limit: int | None = Field(exclude=True, default=None, repr=False)
 
     # fans
-    fans: List[Fan] = field(default_factory=list)
-    fan_psu: int = None
+    fans: List[Fan] = Field(default_factory=list)
+    fan_psu: int | None = None
 
     # boards
-    hashboards: List[HashBoard] = field(default_factory=list)
-    total_chips: int = field(init=False)
-    nominal: bool = field(init=False)
+    hashboards: List[HashBoard] = Field(default_factory=list)
 
     # config
-    config: MinerConfig = None
-    fault_light: Union[bool, None] = None
+    config: MinerConfig | None = None
+    fault_light: bool | None = None
 
     # errors
     errors: List[
@@ -138,30 +127,18 @@ class MinerData:
             X19Error,
             InnosiliconError,
         ]
-    ] = field(default_factory=list)
+    ] = Field(default_factory=list)
 
     # mining state
     is_mining: bool = True
-    uptime: int = None
-    efficiency: int = field(init=False)
+    uptime: int | None = None
 
     # pools
-    pools: list[PoolMetrics] = field(default_factory=list)
+    pools: list[PoolMetrics] = Field(default_factory=list)
 
     @classmethod
     def fields(cls):
-        return [f.name for f in fields(cls) if not f.name.startswith("_")]
-
-    @staticmethod
-    def dict_factory(x):
-        return {
-            k: v.value if isinstance(v, Scheme) else v
-            for (k, v) in x
-            if not k.startswith("_")
-        }
-
-    def __post_init__(self):
-        self._datetime = datetime.now(timezone.utc).astimezone()
+        return list(cls.model_fields.keys())
 
     def get(self, __key: str, default: Any = None):
         try:
@@ -189,19 +166,19 @@ class MinerData:
 
     def __floordiv__(self, other):
         cp = copy.deepcopy(self)
-        for key in self:
+        for key in self.fields():
             item = getattr(self, key)
             if isinstance(item, int):
                 setattr(cp, key, item // other)
             if isinstance(item, float):
-                setattr(cp, key, round(item / other, 2))
+                setattr(cp, key, item / other)
         return cp
 
     def __add__(self, other):
         if not isinstance(other, MinerData):
             raise TypeError("Cannot add MinerData to non MinerData type.")
         cp = copy.deepcopy(self)
-        for key in self:
+        for key in self.fields():
             item = getattr(self, key)
             other_item = getattr(other, key)
             if item is None:
@@ -221,34 +198,37 @@ class MinerData:
                 setattr(cp, key, item & other_item)
         return cp
 
+    @computed_field  # type: ignore[misc]
     @property
-    def hashrate(self):  # noqa - Skip PyCharm inspection
+    def hashrate(self) -> AlgoHashRateType | None:
         if len(self.hashboards) > 0:
             hr_data = []
             for item in self.hashboards:
                 if item.hashrate is not None:
                     hr_data.append(item.hashrate)
             if len(hr_data) > 0:
-                return sum(hr_data, start=type(hr_data[0])(0))
-        return self._hashrate
+                return sum(hr_data, start=self.device_info.algo.hashrate(rate=0))
+        return self.raw_hashrate
 
     @hashrate.setter
     def hashrate(self, val):
-        self._hashrate = val
+        self.raw_hashrate = val
 
+    @computed_field  # type: ignore[misc]
     @property
-    def wattage_limit(self):  # noqa - Skip PyCharm inspection
+    def wattage_limit(self) -> int | None:
         if self.config is not None:
             if isinstance(self.config.mining_mode, MiningModePowerTune):
                 return self.config.mining_mode.power
-        return self._wattage_limit
+        return self.raw_wattage_limit
 
     @wattage_limit.setter
     def wattage_limit(self, val: int):
-        self._wattage_limit = val
+        self.raw_wattage_limit = val
 
+    @computed_field  # type: ignore[misc]
     @property
-    def total_chips(self):  # noqa - Skip PyCharm inspection
+    def total_chips(self) -> int | None:
         if len(self.hashboards) > 0:
             chip_data = []
             for item in self.hashboards:
@@ -258,34 +238,25 @@ class MinerData:
                 return sum(chip_data)
             return None
 
-    @total_chips.setter
-    def total_chips(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def nominal(self):  # noqa - Skip PyCharm inspection
+    def nominal(self) -> bool | None:
         if self.total_chips is None or self.expected_chips is None:
             return None
         return self.expected_chips == self.total_chips
 
-    @nominal.setter
-    def nominal(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def percent_expected_chips(self):  # noqa - Skip PyCharm inspection
+    def percent_expected_chips(self) -> int | None:
         if self.total_chips is None or self.expected_chips is None:
             return None
         if self.total_chips == 0 or self.expected_chips == 0:
             return 0
         return round((self.total_chips / self.expected_chips) * 100)
 
-    @percent_expected_chips.setter
-    def percent_expected_chips(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def percent_expected_hashrate(self):  # noqa - Skip PyCharm inspection
+    def percent_expected_hashrate(self) -> int | None:
         if self.hashrate is None or self.expected_hashrate is None:
             return None
         try:
@@ -293,12 +264,9 @@ class MinerData:
         except ZeroDivisionError:
             return 0
 
-    @percent_expected_hashrate.setter
-    def percent_expected_hashrate(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def percent_expected_wattage(self):  # noqa - Skip PyCharm inspection
+    def percent_expected_wattage(self) -> int | None:
         if self.wattage_limit is None or self.wattage is None:
             return None
         try:
@@ -306,12 +274,9 @@ class MinerData:
         except ZeroDivisionError:
             return 0
 
-    @percent_expected_wattage.setter
-    def percent_expected_wattage(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def temperature_avg(self):  # noqa - Skip PyCharm inspection
+    def temperature_avg(self) -> int | None:
         total_temp = 0
         temp_count = 0
         for hb in self.hashboards:
@@ -322,12 +287,9 @@ class MinerData:
             return None
         return round(total_temp / temp_count)
 
-    @temperature_avg.setter
-    def temperature_avg(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def efficiency(self):  # noqa - Skip PyCharm inspection
+    def efficiency(self) -> int | None:
         if self.hashrate is None or self.wattage is None:
             return None
         try:
@@ -335,67 +297,45 @@ class MinerData:
         except ZeroDivisionError:
             return 0
 
-    @efficiency.setter
-    def efficiency(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def datetime(self):  # noqa - Skip PyCharm inspection
-        return self._datetime.isoformat()
+    def datetime(self) -> str:
+        return self.raw_datetime.isoformat()
 
-    @datetime.setter
-    def datetime(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def timestamp(self):  # noqa - Skip PyCharm inspection
-        return int(time.mktime(self._datetime.timetuple()))
+    def timestamp(self) -> int:
+        return int(time.mktime(self.raw_datetime.timetuple()))
 
-    @timestamp.setter
-    def timestamp(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def make(self):  # noqa - Skip PyCharm inspection
+    def make(self) -> str:
         if self.device_info.make is not None:
             return str(self.device_info.make)
 
-    @make.setter
-    def make(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def model(self):  # noqa - Skip PyCharm inspection
+    def model(self) -> str:
         if self.device_info.model is not None:
             return str(self.device_info.model)
 
-    @model.setter
-    def model(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def firmware(self):  # noqa - Skip PyCharm inspection
+    def firmware(self) -> str:
         if self.device_info.firmware is not None:
             return str(self.device_info.firmware)
 
-    @firmware.setter
-    def firmware(self, val):
-        pass
-
+    @computed_field  # type: ignore[misc]
     @property
-    def algo(self):  # noqa - Skip PyCharm inspection
+    def algo(self) -> str:
         if self.device_info.algo is not None:
             return str(self.device_info.algo)
 
-    @algo.setter
-    def algo(self, val):
-        pass
-
     def keys(self) -> list:
-        return [f.name for f in fields(self)]
+        return list(self.model_fields.keys())
 
     def asdict(self) -> dict:
-        return asdict(self, dict_factory=self.dict_factory)
+        return self.model_dump()
 
     def as_dict(self) -> dict:
         """Get this dataclass as a dictionary.
@@ -411,7 +351,7 @@ class MinerData:
         Returns:
             A JSON version of this class.
         """
-        return json.dumps(self.as_dict())
+        return self.model_dump_json()
 
     def as_csv(self) -> str:
         """Get this dataclass as CSV.
@@ -440,7 +380,7 @@ class MinerData:
         field_data = []
 
         tags = ["ip", "mac", "model", "hostname"]
-        for attribute in self:
+        for attribute in self.fields():
             if attribute in tags:
                 escaped_data = self.get(attribute, "Unknown").replace(" ", "\\ ")
                 tag_data.append(f"{attribute}={escaped_data}")

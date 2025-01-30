@@ -14,4 +14,5 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
+from .A1126 import CGMinerAvalon1126Pro
 from .A1166 import CGMinerAvalon1166Pro

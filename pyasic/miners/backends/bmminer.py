@@ -17,7 +17,9 @@
 from typing import List, Optional
 
 from pyasic.config import MinerConfig
-from pyasic.data import AlgoHashRate, Fan, HashBoard, HashUnit
+from pyasic.data import Fan, HashBoard
+from pyasic.data.pools import PoolMetrics, PoolUrl
+from pyasic.device.algorithm import AlgoHashRate
 from pyasic.errors import APIError
 from pyasic.miners.data import DataFunction, DataLocations, DataOptions, RPCAPICommand
 from pyasic.miners.device.firmware import StockFirmware
@@ -52,6 +54,10 @@ BMMINER_DATA_LOC = DataLocations(
         str(DataOptions.UPTIME): DataFunction(
             "_get_uptime",
             [RPCAPICommand("rpc_stats", "stats")],
+        ),
+        str(DataOptions.POOLS): DataFunction(
+            "_get_pools",
+            [RPCAPICommand("rpc_pools", "pools")],
         ),
     }
 )
@@ -119,8 +125,9 @@ class BMMiner(StockFirmware):
 
         if rpc_summary is not None:
             try:
-                return AlgoHashRate.SHA256(
-                    rpc_summary["SUMMARY"][0]["GHS 5s"], HashUnit.SHA256.GH
+                return self.algo.hashrate(
+                    rate=float(rpc_summary["SUMMARY"][0]["GHS 5s"]),
+                    unit=self.algo.unit.GH,
                 ).into(self.algo.unit.default)
             except (LookupError, ValueError, TypeError):
                 pass
@@ -178,8 +185,8 @@ class BMMiner(StockFirmware):
 
                         hashrate = boards[1].get(f"chain_rate{i}")
                         if hashrate:
-                            hashboard.hashrate = AlgoHashRate.SHA256(
-                                hashrate, HashUnit.SHA256.GH
+                            hashboard.hashrate = self.algo.hashrate(
+                                rate=float(hashrate), unit=self.algo.unit.GH
                             ).into(self.algo.unit.default)
 
                         chips = boards[1].get(f"chain_acn{i}")
@@ -240,8 +247,8 @@ class BMMiner(StockFirmware):
                     rate_unit = rpc_stats["STATS"][1]["rate_unit"]
                 except KeyError:
                     rate_unit = "GH"
-                return AlgoHashRate.SHA256(
-                    expected_rate, HashUnit.SHA256.from_str(rate_unit)
+                return self.algo.hashrate(
+                    rate=float(expected_rate), unit=self.algo.unit.from_str(rate_unit)
                 ).into(self.algo.unit.default)
             except LookupError:
                 pass
@@ -258,3 +265,33 @@ class BMMiner(StockFirmware):
                 return int(rpc_stats["STATS"][1]["Elapsed"])
             except LookupError:
                 pass
+
+    async def _get_pools(self, rpc_pools: dict = None) -> List[PoolMetrics]:
+        if rpc_pools is None:
+            try:
+                rpc_pools = await self.rpc.pools()
+            except APIError:
+                pass
+
+        pools_data = []
+        if rpc_pools is not None:
+            try:
+                pools = rpc_pools.get("POOLS", [])
+                for pool_info in pools:
+                    url = pool_info.get("URL")
+                    pool_url = PoolUrl.from_str(url) if url else None
+                    pool_data = PoolMetrics(
+                        accepted=pool_info.get("Accepted"),
+                        rejected=pool_info.get("Rejected"),
+                        get_failures=pool_info.get("Get Failures"),
+                        remote_failures=pool_info.get("Remote Failures"),
+                        active=pool_info.get("Stratum Active"),
+                        alive=pool_info.get("Status") == "Alive",
+                        url=pool_url,
+                        user=pool_info.get("User"),
+                        index=pool_info.get("POOL"),
+                    )
+                    pools_data.append(pool_data)
+            except LookupError:
+                pass
+        return pools_data

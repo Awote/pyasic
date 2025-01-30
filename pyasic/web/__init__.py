@@ -19,6 +19,7 @@ from .base import BaseWebAPI
 from .braiins_os import BOSerWebAPI, BOSMinerWebAPI
 from .epic import ePICWebAPI
 from .goldshell import GoldshellWebAPI
+from .hammer import HammerWebAPI
 from .iceriver import IceRiverWebAPI
 from .innosilicon import InnosiliconWebAPI
 from .vnish import VNishWebAPI

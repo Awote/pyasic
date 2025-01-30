@@ -19,14 +19,16 @@ import warnings
 from typing import List, Optional, Protocol, Tuple, Type, TypeVar, Union
 
 from pyasic.config import MinerConfig
-from pyasic.data import AlgoHashRate, Fan, HashBoard, MinerData
+from pyasic.data import Fan, HashBoard, MinerData
 from pyasic.data.device import DeviceInfo
 from pyasic.data.error_codes import MinerErrorData
 from pyasic.data.pools import PoolMetrics
-from pyasic.device import MinerModel
-from pyasic.device.algorithm import MinerAlgo
+from pyasic.device.algorithm import MinerAlgoType
+from pyasic.device.algorithm.base import GenericAlgo
+from pyasic.device.algorithm.hashrate import AlgoHashRate
 from pyasic.device.firmware import MinerFirmware
 from pyasic.device.makes import MinerMake
+from pyasic.device.models import MinerModelType
 from pyasic.errors import APIError
 from pyasic.logger import logger
 from pyasic.miners.data import DataLocations, DataOptions, RPCAPICommand, WebAPICommand
@@ -43,18 +45,19 @@ class MinerProtocol(Protocol):
     ssh: _ssh_cls = None
 
     make: MinerMake = None
-    raw_model: MinerModel = None
+    raw_model: MinerModelType = None
     firmware: MinerFirmware = None
-    algo = MinerAlgo.SHA256
+    algo: type[MinerAlgoType] = GenericAlgo
 
-    expected_hashboards: int = 3
+    expected_hashboards: int = None
     expected_chips: int = None
-    expected_fans: int = 2
+    expected_fans: int = None
 
     data_locations: DataLocations = None
 
     supports_shutdown: bool = False
     supports_power_modes: bool = False
+    supports_presets: bool = False
     supports_autotuning: bool = False
 
     api_ver: str = None
@@ -97,6 +100,11 @@ class MinerProtocol(Protocol):
         return self.rpc
 
     async def check_light(self) -> bool:
+        """Get the status of the fault light as a boolean.
+
+        Returns:
+            A boolean value representing the fault light status.
+        """
         return await self.get_fault_light()
 
     async def fault_light_on(self) -> bool:
@@ -173,6 +181,27 @@ class MinerProtocol(Protocol):
 
         Returns:
             A boolean value of the success of setting the power limit.
+        """
+        return False
+
+    async def upgrade_firmware(
+        self,
+        *,
+        file: str = None,
+        url: str = None,
+        version: str = None,
+        keep_settings: bool = True,
+    ) -> bool:
+        """Upgrade the firmware of the miner.
+
+        Parameters:
+            file: The file path to the firmware to upgrade from. Must be a valid file path if provided.
+            url: The URL to download the firmware from. Must be a valid URL if provided.
+            version: The version of the firmware to upgrade to. If None, the version will be inferred from the file or URL.
+            keep_settings: Whether to keep the current settings during the upgrade. Defaults to True.
+
+        Returns:
+            A boolean value of the success of the firmware upgrade.
         """
         return False
 
@@ -345,7 +374,7 @@ class MinerProtocol(Protocol):
     async def get_pools(self) -> List[PoolMetrics]:
         """Get the pools information from Miner.
 
-        Return:
+        Returns:
             The pool information of the miner.
         """
         return await self._get_pools()
@@ -528,7 +557,11 @@ class MinerProtocol(Protocol):
             expected_fans=self.expected_fans,
             hashboards=[
                 HashBoard(slot=i, expected_chips=self.expected_chips)
-                for i in range(self.expected_hashboards)
+                for i in range(
+                    self.expected_hashboards
+                    if self.expected_hashboards is not None
+                    else 0
+                )
             ],
         )
 
@@ -559,27 +592,6 @@ class BaseMiner(MinerProtocol):
             self.web = self._web_cls(ip)
         if self._ssh_cls is not None:
             self.ssh = self._ssh_cls(ip)
-
-    async def upgrade_firmware(
-        self,
-        *,
-        file: str = None,
-        url: str = None,
-        version: str = None,
-        keep_settings: bool = True,
-    ) -> bool:
-        """Upgrade the firmware of the miner.
-
-        Parameters:
-            file (str, optional): The file path to the firmware to upgrade from. Must be a valid file path if provided.
-            url (str, optional): The URL to download the firmware from. Must be a valid URL if provided.
-            version (str, optional): The version of the firmware to upgrade to. If None, the version will be inferred from the file or URL.
-            keep_settings (bool, optional): Whether to keep the current settings during the upgrade. Defaults to True.
-
-        Returns:
-            A boolean value of the success of the firmware upgrade.
-        """
-        return False
 
 
 AnyMiner = TypeVar("AnyMiner", bound=BaseMiner)
