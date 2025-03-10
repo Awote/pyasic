@@ -55,6 +55,12 @@ class FanModeNormal(MinerConfigValue):
     def as_am_modern(self) -> dict:
         return {"bitmain-fan-ctrl": False, "bitmain-fan-pwn": "100"}
 
+    def as_hiveon_modern(self) -> dict:
+        return {"bitmain-fan-ctrl": False, "bitmain-fan-pwn": "100"}
+
+    def as_elphapex(self) -> dict:
+        return {"fc-fan-ctrl": False, "fc-fan-pwn": "100"}
+
     def as_bosminer(self) -> dict:
         return {
             "temp_control": {"mode": "auto"},
@@ -135,6 +141,12 @@ class FanModeManual(MinerConfigValue):
     def as_am_modern(self) -> dict:
         return {"bitmain-fan-ctrl": True, "bitmain-fan-pwm": str(self.speed)}
 
+    def as_hiveon_modern(self) -> dict:
+        return {"bitmain-fan-ctrl": True, "bitmain-fan-pwm": str(self.speed)}
+
+    def as_elphapex(self) -> dict:
+        return {"fc-fan-ctrl": True, "fc-fan-pwm": str(self.speed)}
+
     def as_bosminer(self) -> dict:
         return {
             "temp_control": {"mode": "manual"},
@@ -185,6 +197,12 @@ class FanModeImmersion(MinerConfigValue):
     def as_am_modern(self) -> dict:
         return {"bitmain-fan-ctrl": True, "bitmain-fan-pwm": "0"}
 
+    def as_hiveon_modern(self) -> dict:
+        return {"bitmain-fan-ctrl": True, "bitmain-fan-pwm": "0"}
+
+    def as_elphapex(self) -> dict:
+        return {"fc-fan-ctrl": True, "fc-fan-pwm": "0"}
+
     def as_bosminer(self) -> dict:
         return {
             "fan_control": {"min_fans": 0},
@@ -231,6 +249,34 @@ class FanModeConfig(MinerConfigOption):
             fan_manual = web_conf["bitmain-fan-ctrl"]
             if fan_manual:
                 speed = int(web_conf["bitmain-fan-pwm"])
+                if speed == 0:
+                    return cls.immersion()
+                return cls.manual(speed=speed)
+            else:
+                return cls.normal()
+        else:
+            return cls.default()
+
+    @classmethod
+    def from_hiveon_modern(cls, web_conf: dict):
+        if web_conf.get("bitmain-fan-ctrl") is not None:
+            fan_manual = web_conf["bitmain-fan-ctrl"]
+            if fan_manual:
+                speed = int(web_conf["bitmain-fan-pwm"])
+                if speed == 0:
+                    return cls.immersion()
+                return cls.manual(speed=speed)
+            else:
+                return cls.normal()
+        else:
+            return cls.default()
+
+    @classmethod
+    def from_elphapex(cls, web_conf: dict):
+        if web_conf.get("fc-fan-ctrl") is not None:
+            fan_manual = web_conf["fc-fan-ctrl"]
+            if fan_manual:
+                speed = int(web_conf["fc-fan-pwm"])
                 if speed == 0:
                     return cls.immersion()
                 return cls.manual(speed=speed)

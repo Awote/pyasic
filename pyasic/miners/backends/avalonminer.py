@@ -57,6 +57,10 @@ AVALON_DATA_LOC = DataLocations(
             "_get_wattage_limit",
             [RPCAPICommand("rpc_stats", "stats")],
         ),
+        str(DataOptions.WATTAGE): DataFunction(
+            "_get_wattage",
+            [RPCAPICommand("rpc_stats", "stats")],
+        ),
         str(DataOptions.FANS): DataFunction(
             "_get_fans",
             [RPCAPICommand("rpc_stats", "stats")],
@@ -94,6 +98,23 @@ class AvalonMiner(CGMiner):
     async def fault_light_off(self) -> bool:
         try:
             data = await self.rpc.ascset(0, "led", "1-0")
+        except APIError:
+            return False
+        if data["STATUS"][0]["Msg"] == "ASC 0 set OK":
+            return True
+        return False
+
+    async def set_power_limit(self, wattage: int) -> bool:
+        try:
+            if wattage < 3:
+                limit = wattage
+            elif wattage > 100:
+                limit = 2
+            elif wattage > 80:
+                limit = 1
+            else:
+                limit = 0
+            data = await self.rpc.ascset(0, "worklevel,set", 1)
         except APIError:
             return False
         if data["STATUS"][0]["Msg"] == "ASC 0 set OK":
@@ -286,6 +307,21 @@ class AvalonMiner(CGMiner):
                 unparsed_stats = rpc_stats["STATS"][0]["MM ID0"]
                 parsed_stats = self.parse_stats(unparsed_stats)
                 return int(parsed_stats["MPO"][0])
+            except (IndexError, KeyError, ValueError, TypeError):
+                pass
+
+    async def _get_wattage(self, rpc_stats: dict = None) -> Optional[int]:
+        if rpc_stats is None:
+            try:
+                rpc_stats = await self.rpc.stats()
+            except APIError:
+                pass
+
+        if rpc_stats is not None:
+            try:
+                unparsed_stats = rpc_stats["STATS"][0]["MM ID0"]
+                parsed_stats = self.parse_stats(unparsed_stats)
+                return int(parsed_stats["WALLPOWER"][0])
             except (IndexError, KeyError, ValueError, TypeError):
                 pass
 

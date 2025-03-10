@@ -56,6 +56,26 @@ class MinerConfig(BaseModel):
             **self.temperature.as_am_modern(),
         }
 
+    def as_hiveon_modern(self, user_suffix: str | None = None) -> dict:
+        """Generates the configuration in the format suitable for modern Hiveon."""
+        return {
+            **self.fan_mode.as_hiveon_modern(),
+            "freq-level": "100",
+            **self.mining_mode.as_hiveon_modern(),
+            **self.pools.as_hiveon_modern(user_suffix=user_suffix),
+            **self.temperature.as_hiveon_modern(),
+        }
+
+    def as_elphapex(self, user_suffix: str | None = None) -> dict:
+        """Generates the configuration in the format suitable for modern Elphapex."""
+        return {
+            **self.fan_mode.as_elphapex(),
+            "fc-freq-level": "100",
+            **self.mining_mode.as_elphapex(),
+            **self.pools.as_elphapex(user_suffix=user_suffix),
+            **self.temperature.as_elphapex(),
+        }
+
     def as_wm(self, user_suffix: str | None = None) -> dict:
         """Generates the configuration in the format suitable for Whatsminers."""
         return {
@@ -200,6 +220,24 @@ class MinerConfig(BaseModel):
         )
 
     @classmethod
+    def from_hiveon_modern(cls, web_conf: dict) -> "MinerConfig":
+        """Constructs a MinerConfig object from web configuration for Hiveon."""
+        return cls(
+            pools=PoolConfig.from_hiveon_modern(web_conf),
+            mining_mode=MiningModeConfig.from_hiveon_modern(web_conf),
+            fan_mode=FanModeConfig.from_hiveon_modern(web_conf),
+        )
+
+    @classmethod
+    def from_elphapex(cls, web_conf: dict) -> "MinerConfig":
+        """Constructs a MinerConfig object from web configuration for modern Antminers."""
+        return cls(
+            pools=PoolConfig.from_elphapex(web_conf),
+            mining_mode=MiningModeConfig.from_elphapex(web_conf),
+            fan_mode=FanModeConfig.from_elphapex(web_conf),
+        )
+
+    @classmethod
     def from_am_old(cls, web_conf: dict) -> "MinerConfig":
         """Constructs a MinerConfig object from web configuration for old versions of Antminers."""
         return cls.from_am_modern(web_conf)
@@ -308,7 +346,3 @@ class MinerConfig(BaseModel):
     @classmethod
     def from_hammer(cls, *args, **kwargs) -> "MinerConfig":
         return cls.from_am_modern(*args, **kwargs)
-
-    @classmethod
-    def from_hiveon_modern(cls, web_conf: dict) -> "MinerConfig":
-        return cls.from_am_modern(web_conf)

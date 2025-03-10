@@ -28,6 +28,9 @@ class MinerConfigOption(Enum):
     def as_am_modern(self) -> dict:
         return self.value.as_am_modern()
 
+    def as_hiveon_modern(self) -> dict:
+        return self.value.as_hiveon_modern()
+
     def as_am_old(self) -> dict:
         return self.value.as_am_old()
 
@@ -67,6 +70,9 @@ class MinerConfigOption(Enum):
     def as_luxos(self) -> dict:
         return self.value.as_luxos()
 
+    def as_elphapex(self) -> dict:
+        return self.value.as_elphapex()
+
     def __call__(self, *args, **kwargs):
         return self.value(*args, **kwargs)
 
@@ -90,6 +96,9 @@ class MinerConfigValue(BaseModel):
         return self.model_dump()
 
     def as_am_modern(self) -> dict:
+        return {}
+
+    def as_hiveon_modern(self) -> dict:
         return {}
 
     def as_am_old(self) -> dict:
@@ -129,6 +138,9 @@ class MinerConfigValue(BaseModel):
         return {}
 
     def as_luxos(self) -> dict:
+        return {}
+
+    def as_elphapex(self) -> dict:
         return {}
 
     def __getitem__(self, item):
